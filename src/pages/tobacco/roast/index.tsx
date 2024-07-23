@@ -61,25 +61,24 @@ const labels = {
 
 export default function index() {
   const columns: ColumnsType<TableData> = [
-    { title: '烤房id', dataIndex: 'room_id', key: 'room_id' },
-    { title: '开始时间', dataIndex: 'start_time', key: 'start_time' },
-    { title: '结束时间', dataIndex: 'end_time', key: 'end_time' },
+    { title: '烤房id', dataIndex: 'roomId', key: 'roomId' },
+    { title: '开始时间', dataIndex: 'startTime', key: 'startTime' },
+    { title: '结束时间', dataIndex: 'endTime', key: 'endTime' },
     { title: '烘烤天数', dataIndex: 'days', key: 'days' },
     { title: '炕次', dataIndex: 'sequence', key: 'sequence' },
     { title: '部位', dataIndex: 'part', key: 'part' },
     { title: '夹烟工具', dataIndex: 'tool', key: 'tool' },
-    { title: '总竿数', dataIndex: 'total_pole_amount', key: 'total_pole_amount' },
-    { title: '总重量', dataIndex: 'total_weight', key: 'total_weight' },
-    { title: '抽样杆数', dataIndex: 'sample_pole_amount', key: 'sample_pole_amount' },
-    { title: '抽样重量', dataIndex: 'sample_weight', key: 'sample_weight' },
-    { title: '青杂重量', dataIndex: 'green_weight', key: 'green_weight' },
-    { title: '抽样重量', dataIndex: 'sample_total_weight', key: 'sample_total_weight' },
-    { title: '黄烟率', dataIndex: 'yellow_rate', key: 'yellow_rate' },
+    { title: '总竿数', dataIndex: 'totalPoleAmount', key: 'totalPoleAmount' },
+    { title: '总重量', dataIndex: 'totalWeight', key: 'totalWeight' },
+    { title: '抽样杆数', dataIndex: 'samplePoleAmount', key: 'samplePoleAmount' },
+    { title: '抽样重量', dataIndex: 'sampleWeight', key: 'sampleWeight' },
+    { title: '青杂重量', dataIndex: 'greenWeight', key: 'greenWeight' },
+    { title: '抽样重量', dataIndex: 'sampleTotalWeight', key: 'sampleTotalWeight' },
+    { title: '黄烟率', dataIndex: 'yellowRate', key: 'yellowRate' },
     { title: '经度', dataIndex: 'longitude', key: 'longitude' },
     { title: '纬度', dataIndex: 'latitude', key: 'latitude' },
     {
       title: '图片',
-      // dataIndex: 'imgs',
       key: 'imgs',
       render: (text: string, record) => {
         if (!record.imgs) {
@@ -87,26 +86,21 @@ export default function index() {
         } else if (typeof record.imgs == 'string') {
           return <Image src={record.imgs} alt="img" width={100} />
         } else {
-          // 数组
-          return <Image.PreviewGroup
-            items={record.imgs}
-          >
-            <Image
-              width={100}
-              src={record.imgs[0]}
-            />
+          return <Image.PreviewGroup items={record.imgs}>
+            <Image width={100} src={record.imgs[0]} />
           </Image.PreviewGroup>
         }
       },
     },
-    { title: '烤房绑定烟农', dataIndex: 'is_main_farmer', key: 'is_main_farmer' },
-    { title: '烟农id', dataIndex: 'farmer_id', key: 'farmer_id' },
-    { title: '烤房绑定填报人', dataIndex: 'is_main_collector', key: 'is_main_collector' },
-    { title: '采集人id', dataIndex: 'collector_id', key: 'collector_id' },
-    { title: '填报时间', dataIndex: 'submit_time', key: 'submit_time' },
-    { title: '修改时间', dataIndex: 'modify_time', key: 'modify_time' },
-    { title: '创建时间', dataIndex: 'create_time', key: 'create_time' },
+    { title: '烤房绑定烟农', dataIndex: 'isMainFarmer', key: 'isMainFarmer' },
+    { title: '烟农id', dataIndex: 'farmerId', key: 'farmerId' },
+    { title: '烤房绑定填报人', dataIndex: 'isMainCollector', key: 'isMainCollector' },
+    { title: '采集人id', dataIndex: 'collectorId', key: 'collectorId' },
+    { title: '填报时间', dataIndex: 'submitTime', key: 'submitTime' },
+    { title: '修改时间', dataIndex: 'modifyTime', key: 'modifyTime' },
+    { title: '创建时间', dataIndex: 'createTime', key: 'createTime' },
   ];
+
   columns.forEach(item => item.align = 'center')
   const [form] = Form.useForm();
 
@@ -117,6 +111,7 @@ export default function index() {
       startTime: values.startTime ? values.startTime.format('YYYY-MM-DD HH:mm:ss') : null,
       endTime: values.endTime ? values.endTime.format('YYYY-MM-DD HH:mm:ss') : null,
     };
+    console.log(formattedValues)
     getRoomData(formattedValues)
   };
   const [tableData, setTableData] = useState<TableData[]>([])
@@ -126,7 +121,7 @@ export default function index() {
   useEffect(() => {
     getRoomData(queryObject)
   }, [])
-  const getRoomData = (data) => {
+  const getRoomData = (data: any) => {
     tobaccoService.backingQuery(data).then(res => {
       res.forEach((item: TableData) => {
         item.modifyTime = parseTime(item.modifyTime)
@@ -136,7 +131,7 @@ export default function index() {
         item.endTime = parseTime(item.endTime)
       })
       setTableData(res)
-      setRoomIdList(res.map((x: TableData) => x.id))
+      setRoomIdList(res.map((x: TableData) => x.roomId))
       setFarmerIdList(res.map((x: TableData) => x.farmerId))
       setCollectIdList(res.map((x: TableData) => x.collectorId))
     })
@@ -185,7 +180,7 @@ export default function index() {
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit">
-            Submit
+            查询
           </Button>
         </Form.Item>
       </Form>
@@ -196,6 +191,12 @@ export default function index() {
         rowKey="id"
         className='whitespace-nowrap mt-6'
         scroll={{ x: true }}
+        pagination={{
+          pageSize: 5,
+          total: tableData.length,
+          showQuickJumper: true,
+          showTotal: _ => `共${tableData.length}条`
+        }}
       />
     </div>
   );

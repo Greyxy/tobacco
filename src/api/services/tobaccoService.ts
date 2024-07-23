@@ -29,8 +29,7 @@ const getRoomByArea = () => apiClient.get({ url: TobaccoApi.getRoomByArea })
 const reviewBacking = (id: string) => apiClient.post({ url: `${TobaccoApi.reviewBacking}${id}` })
 const refuseBacking = (id: string) => apiClient.post({ url: `${TobaccoApi.refuseBacking}${id}` })
 const login = (data) => apiClient.post({ url: TobaccoApi.login, data })
-const backingQuery = (data) => {
-  console.log(data = {})
+const backingQuery = (data: any) => {
   return apiClient.post({ url: TobaccoApi.backingQuery, data })
 }
 const backgingFind = (id: string) => apiClient.get({ url: `${TobaccoApi.backingFind}${id}` })
