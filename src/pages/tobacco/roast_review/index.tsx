@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Form, Input, Button, Table, Space, Select, Modal, Checkbox, Radio, message,Image  } from 'antd';
+import { Form, Input, Button, Table, Space, Select, Modal, Checkbox, Radio, message, Image } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useThemeToken } from '@/theme/hooks';
 import tobaccoService from '@/api/services/tobaccoService';
@@ -116,15 +116,14 @@ export default function index() {
         if (!record.imgs) {
           return <span>暂无数据</span>
         } else if (typeof record.imgs == 'string') {
-
-          return <Image src={text} alt="img" width={100} />
+          return <Image src={record.imgs} alt="img" width={100} />
         } else {
           // 数组
-          <Image.PreviewGroup
+          return <Image.PreviewGroup
             items={record.imgs}
           >
             <Image
-              width={200}
+              width={100}
               src={record.imgs[0]}
             />
           </Image.PreviewGroup>
