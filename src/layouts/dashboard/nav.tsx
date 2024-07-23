@@ -126,7 +126,8 @@ export default function Nav(props: Props) {
           {themeLayout !== ThemeLayout.Mini && (
             <m.div variants={slideInLeft}>
               <span className="ml-2 text-xl font-bold" style={{ color: colorPrimary }}>
-                Slash Admin
+                {/* Slash Admin */}
+                {window.config.title}
               </span>
             </m.div>
           )}

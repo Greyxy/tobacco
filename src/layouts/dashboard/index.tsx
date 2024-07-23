@@ -13,11 +13,16 @@ import Nav from './nav';
 import NavHorizontal from './nav-horizontal';
 
 import { ThemeLayout, ThemeMode } from '#/enum';
+import useLocale from '@/locales/useLocale';
 
 function DashboardLayout() {
+  const { setLocale, locale } = useLocale();
   const { colorBgElevated, colorTextBase } = useThemeToken();
   const { themeLayout, themeMode } = useSettings();
+  if (locale != 'zh_CN') {
 
+    setLocale('zh_CN')
+  }
   const mainEl = useRef(null);
   const { scrollY } = useScroll({ container: mainEl });
   /**

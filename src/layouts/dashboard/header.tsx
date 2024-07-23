@@ -72,16 +72,16 @@ export default function Header({ className = '', offsetTop = false }: Props) {
           </div>
 
           <div className="flex">
-            <SearchBar />
-            <LocalePicker />
-            <IconButton onClick={() => window.open('https://github.com/d3george/slash-admin')}>
+            {/* <SearchBar /> */}
+            {/* <LocalePicker /> */}
+            {/* <IconButton onClick={() => window.open('https://github.com/d3george/slash-admin')}>
               <Iconify icon="mdi:github" size={24} />
             </IconButton>
             <IconButton onClick={() => window.open('https://discord.gg/fXemAXVNDa')}>
-              <Iconify icon="carbon:logo-discord" size={24} />
+              <Iconify icon="carbon:logo-discord" size={24}l />
             </IconButton>
-            <NoticeButton />
-            <SettingButton />
+            <NoticeButton /> */}
+            {/* <SettingButton /> */}
             <AccountDropdown />
           </div>
         </div>

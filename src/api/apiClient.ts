@@ -9,7 +9,8 @@ import { ResultEnum } from '#/enum';
 
 // 创建 axios 实例
 const axiosInstance = axios.create({
-  baseURL: import.meta.env.VITE_APP_BASE_API,
+  // baseURL: import.meta.env.VITE_APP_BASE_API,
+  baseURL: 'https://mgr.sctworks.com/service/',
   timeout: 50000,
   headers: { 'Content-Type': 'application/json;charset=utf-8' },
 });
@@ -18,7 +19,12 @@ const axiosInstance = axios.create({
 axiosInstance.interceptors.request.use(
   (config) => {
     // 在请求被发送之前做些什么
-    config.headers.Authorization = 'Bearer Token';
+    // config.headers.Authorization = 'Bearer Token';
+    const token = JSON.parse(localStorage.getItem('token') || '{}').accessToken
+    if (token) {
+      config.headers['Authorization'] = 'Bearer ' + token
+      config.headers.token = token
+    }
     return config;
   },
   (error) => {
@@ -31,16 +37,24 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (res: AxiosResponse<Result>) => {
     if (!res.data) throw new Error(t('sys.api.apiRequestFailed'));
-
-    const { status, data, message } = res.data;
+    //     data
+    // : 
+    // "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJuZW8iLCJ1aWQiOjEsImNpdHlOYW1lIjoi6LaK6KW_5Y6_IiwiZXhwIjoxNzIxNjY1MjI4fQ.bJnuA1hf2NUNye9A0DcjCZLpfV6n66YqAQBmikjBWGc"
+    // msg
+    // : 
+    // "操作成功"
+    // status
+    // : 
+    //     200
+    const { status, data, msg } = res.data;
     // 业务请求成功
-    const hasSuccess = data && Reflect.has(res.data, 'status') && status === ResultEnum.SUCCESS;
+    const hasSuccess = Reflect.has(res.data, 'status') && status === ResultEnum.SUCCESS;
     if (hasSuccess) {
       return data;
     }
 
     // 业务请求错误
-    throw new Error(message || t('sys.api.apiRequestFailed'));
+    throw new Error(msg || t('sys.api.apiRequestFailed'));
   },
   (error: AxiosError<Result>) => {
     const { response, message } = error || {};

@@ -38,7 +38,8 @@ export default function useLocale() {
     i18n.changeLanguage(locale);
   };
 
-  const locale = (i18n.resolvedLanguage || LocalEnum.en_US) as Locale;
+  const locale = (i18n.resolvedLanguage || LocalEnum.zh_CN) as Locale;
+  // const locale = LocalEnum.zh_CN as Locale
 
   const language = LANGUAGE_MAP[locale];
 

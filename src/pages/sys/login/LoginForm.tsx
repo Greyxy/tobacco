@@ -21,10 +21,10 @@ function LoginForm() {
 
   if (loginState !== LoginStateEnum.LOGIN) return null;
 
-  const handleFinish = async ({ username, password }: SignInReq) => {
+  const handleFinish = async ({ userName, password }: SignInReq) => {
     setLoading(true);
     try {
-      await signIn({ username, password });
+      await signIn({ userName, password });
     } finally {
       setLoading(false);
     }
@@ -37,12 +37,12 @@ function LoginForm() {
         size="large"
         initialValues={{
           remember: true,
-          username: DEFAULT_USER.username,
+          userName: DEFAULT_USER.username,
           password: DEFAULT_USER.password,
         }}
         onFinish={handleFinish}
       >
-        <div className="mb-4 flex flex-col">
+        {/* <div className="mb-4 flex flex-col">
           <Alert
             type="info"
             description={
@@ -71,10 +71,10 @@ function LoginForm() {
             }
             showIcon
           />
-        </div>
+        </div> */}
 
         <Form.Item
-          name="username"
+          name="userName"
           rules={[{ required: true, message: t('sys.login.accountPlaceholder') }]}
         >
           <Input placeholder={t('sys.login.userName')} />
@@ -108,7 +108,7 @@ function LoginForm() {
           </Button>
         </Form.Item>
 
-        <Row align="middle" gutter={8}>
+        {/* <Row align="middle" gutter={8}>
           <Col span={9} flex="1">
             <Button
               className="w-full !text-sm"
@@ -128,16 +128,17 @@ function LoginForm() {
           <Col span={6} flex="1" onClick={() => setLoginState(LoginStateEnum.REGISTER)}>
             <Button className="w-full !text-sm">{t('sys.login.signUpFormTitle')}</Button>
           </Col>
-        </Row>
+        </Row> */}
 
-        <Divider className="!text-xs">{t('sys.login.otherSignIn')}</Divider>
+        {/* <Divider className="!text-xs">{t('sys.login.otherSignIn')}</Divider>
 
         <div className="flex cursor-pointer justify-around text-2xl">
           <AiFillGithub />
           <AiFillWechat />
           <AiFillGoogleCircle />
-        </div>
+        </div> */}
       </Form>
+
     </>
   );
 }

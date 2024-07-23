@@ -4,13 +4,16 @@ import { useNavigate } from 'react-router-dom';
 import { create } from 'zustand';
 
 import userService, { SignInReq } from '@/api/services/userService';
+import tobaccoService from '@/api/services/tobaccoService';
 import { getItem, removeItem, setItem } from '@/utils/storage';
 
 import { UserInfo, UserToken } from '#/entity';
 import { StorageEnum } from '#/enum';
+import { DEFAULT_USER } from '@/_mock/assets'
+// import useLocale, { LANGUAGE_MAP } from '@/locales/useLocale';
 
 const { VITE_APP_HOMEPAGE: HOMEPAGE } = import.meta.env;
-
+// const { setLocale } = useLocale();
 type UserStore = {
   userInfo: Partial<UserInfo>;
   userToken: UserToken;
@@ -53,15 +56,24 @@ export const useSignIn = () => {
   const { setUserToken, setUserInfo } = useUserActions();
 
   const signInMutation = useMutation({
-    mutationFn: userService.signin,
+    // mutationFn: userService.signin,
+    mutationFn: tobaccoService.login
   });
 
   const signIn = async (data: SignInReq) => {
     try {
       const res = await signInMutation.mutateAsync(data);
-      const { user, accessToken, refreshToken } = res;
-      setUserToken({ accessToken, refreshToken });
-      setUserInfo(user);
+      // debugger
+      // const { user, accessToken, refreshToken } = res;
+      // setUserToken({ accessToken, refreshToken });
+      // setUserInfo(user);
+      // setLocale('zh_CN')
+      const accessToken = res
+      setUserToken({
+        accessToken
+        // ,refreshToken:accessToken
+      })
+      setUserInfo({ ...DEFAULT_USER, username: data.userName })
       navigatge(HOMEPAGE, { replace: true });
     } catch (err) {
       message.warning({

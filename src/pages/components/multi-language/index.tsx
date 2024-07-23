@@ -24,7 +24,7 @@ export default function MultiLanguagePage() {
         https://ant.design/docs/react/i18n-cn
       </Typography.Link>
       <Card title="Flexible">
-        <Radio.Group onChange={(e) => setLocale(e.target.value)} value={locale}>
+        <Radio.Group onChange={(e) => { console.log(e.target.value); setLocale(e.target.value) }} value={locale}>
           <Radio value={LocalEnum.en_US}>English</Radio>
           <Radio value={LocalEnum.zh_CN}>Chinese</Radio>
         </Radio.Group>

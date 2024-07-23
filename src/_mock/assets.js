@@ -383,16 +383,16 @@ const ERRORS_PERMISSION = {
   ],
 };
 const OTHERS_PERMISSION = [
-  {
-    id: '3981225257359246',
-    parentId: '',
-    label: 'sys.menu.calendar',
-    name: 'Calendar',
-    icon: 'solar:calendar-bold-duotone',
-    type: PermissionType.MENU,
-    route: 'calendar',
-    component: '/sys/others/calendar/index.tsx',
-  },
+  // {
+  //   id: '3981225257359246',
+  //   parentId: '',
+  //   label: 'sys.menu.calendar',
+  //   name: 'Calendar',
+  //   icon: 'solar:calendar-bold-duotone',
+  //   type: PermissionType.MENU,
+  //   route: 'calendar',
+  //   component: '/sys/others/calendar/index.tsx',
+  // },
   {
     id: '3513985683886393',
     parentId: '',
@@ -425,38 +425,38 @@ const OTHERS_PERMISSION = [
     newFeature: true,
     component: '/sys/others/blank.tsx',
   },
-  {
-    id: '5733704222120995',
-    parentId: '',
-    label: 'sys.menu.frame',
-    name: 'Frame',
-    icon: 'ic_external',
-    type: PermissionType.CATALOGUE,
-    route: 'frame',
-    children: [
-      {
-        id: '9884486809510480',
-        parentId: '5733704222120995',
-        label: 'sys.menu.external_link',
-        name: 'External Link',
-        type: PermissionType.MENU,
-        route: 'external_link',
-        hideTab: true,
-        component: '/sys/others/iframe/external-link.tsx',
-        frameSrc: 'https://ant.design/',
-      },
-      {
-        id: '9299640886731819',
-        parentId: '5733704222120995',
-        label: 'sys.menu.iframe',
-        name: 'Iframe',
-        type: PermissionType.MENU,
-        route: 'frame',
-        component: '/sys/others/iframe/index.tsx',
-        frameSrc: 'https://ant.design/',
-      },
-    ],
-  },
+  // {
+  //   id: '5733704222120995',
+  //   parentId: '',
+  //   label: 'sys.menu.frame',
+  //   name: 'Frame',
+  //   icon: 'ic_external',
+  //   type: PermissionType.CATALOGUE,
+  //   route: 'frame',
+  //   children: [
+  //     {
+  //       id: '9884486809510480',
+  //       parentId: '5733704222120995',
+  //       label: 'sys.menu.external_link',
+  //       name: 'External Link',
+  //       type: PermissionType.MENU,
+  //       route: 'external_link',
+  //       hideTab: true,
+  //       component: '/sys/others/iframe/external-link.tsx',
+  //       frameSrc: 'https://ant.design/',
+  //     },
+  //     {
+  //       id: '9299640886731819',
+  //       parentId: '5733704222120995',
+  //       label: 'sys.menu.iframe',
+  //       name: 'Iframe',
+  //       type: PermissionType.MENU,
+  //       route: 'frame',
+  //       component: '/sys/others/iframe/index.tsx',
+  //       frameSrc: 'https://ant.design/',
+  //     },
+  //   ],
+  // },
   {
     id: '0941594969900756',
     parentId: '',
@@ -468,15 +468,57 @@ const OTHERS_PERMISSION = [
     component: '/sys/others/blank.tsx',
   },
 ];
+// 5448841360415915
+// 
+const TOBACCO = {
+  id: '3686731885609167',
+  parentId: '',
+  label: 'sys.menu.tobacco',
+  name: 'Tobacco',
+  icon: 'ic-analysis',
+  type: PermissionType.CATALOGUE,
+  route: 'tobacco',
+  order: 11,
+  children: [
+    {
+      id: '5448841360415915',
+      parentId: '3686731885609167',
+      label: 'sys.menu.oven',
+      name: 'Oven',
+      type: PermissionType.MENU,
+      route: 'oven',
+      component: '/tobacco/oven/index.tsx'
+    },
+    {
+      id: '5858794618374995',
+      parentId: '3686731885609167',
+      label: 'sys.menu.roast',
+      name: 'Roast',
+      type: PermissionType.MENU,
+      route: 'roast',
+      component: '/tobacco/roast/index.tsx'
+    },
+    {
+      id: '5858794618374996',
+      parentId: '3686731885609167',
+      label: 'sys.menu.roast_review',
+      name: 'RoastReview',
+      type: PermissionType.MENU,
+      route: 'roast_review',
+      component: '/tobacco/roast_review/index.tsx'
+    },
+  ]
+}
 
 export const PERMISSION_LIST = [
-  DASHBOARD_PERMISSION,
-  MANAGEMENT_PERMISSION,
-  COMPONENTS_PERMISSION,
-  FUNCTIONS_PERMISSION,
-  MENU_LEVEL_PERMISSION,
-  ERRORS_PERMISSION,
-  ...OTHERS_PERMISSION,
+  // DASHBOARD_PERMISSION,
+  // MANAGEMENT_PERMISSION,
+  // COMPONENTS_PERMISSION,
+  // FUNCTIONS_PERMISSION,
+  // MENU_LEVEL_PERMISSION,
+  // ERRORS_PERMISSION,
+  TOBACCO,
+  // ...OTHERS_PERMISSION,
 ];
 
 /**
@@ -498,7 +540,11 @@ const TEST_ROLE = {
   status: BasicStatus.ENABLE,
   order: 2,
   desc: 'test',
-  permission: [DASHBOARD_PERMISSION, COMPONENTS_PERMISSION, FUNCTIONS_PERMISSION],
+  permission: [
+    // DASHBOARD_PERMISSION, 
+    // COMPONENTS_PERMISSION,
+    //  FUNCTIONS_PERMISSION, 
+     TOBACCO],
 };
 export const ROLE_LIST = [ADMIN_ROLE, TEST_ROLE];
 
@@ -512,7 +558,7 @@ export const DEFAULT_USER = {
   avatar: faker.image.avatarLegacy(),
   createdAt: faker.date.anytime(),
   updatedAt: faker.date.recent(),
-  password: 'demo1234',
+  password: '123456',
   role: ADMIN_ROLE,
   permissions: ADMIN_ROLE.permission,
 };
