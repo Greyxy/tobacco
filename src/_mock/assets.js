@@ -29,7 +29,7 @@ export const ORG_LIST = [
       { id: '2-2', name: 'Marketing Department', status: 'enable', desc: '', order: 2 },
       { id: '2-3', name: 'Finance Department', status: 'enable', desc: '', order: 3 },
     ],
-  }
+  },
 ];
 
 /**
@@ -469,7 +469,7 @@ const OTHERS_PERMISSION = [
   },
 ];
 // 5448841360415915
-// 
+//
 const TOBACCO = {
   id: '3686731885609167',
   parentId: '',
@@ -487,7 +487,7 @@ const TOBACCO = {
       name: 'Oven',
       type: PermissionType.MENU,
       route: 'oven',
-      component: '/tobacco/oven/index.tsx'
+      component: '/tobacco/oven/index.tsx',
     },
     {
       id: '5858794618374995',
@@ -496,7 +496,7 @@ const TOBACCO = {
       name: 'Roast',
       type: PermissionType.MENU,
       route: 'roast',
-      component: '/tobacco/roast/index.tsx'
+      component: '/tobacco/roast/index.tsx',
     },
     {
       id: '5858794618374996',
@@ -505,10 +505,19 @@ const TOBACCO = {
       name: 'RoastReview',
       type: PermissionType.MENU,
       route: 'roast_review',
-      component: '/tobacco/roast_review/index.tsx'
+      component: '/tobacco/roast_review/index.tsx',
     },
-  ]
-}
+    {
+      id: '5858794618374997',
+      parentId: '3686731885609167',
+      label: 'sys.menu.bind_qrcode',
+      name: 'BindQrCode',
+      type: PermissionType.MENU,
+      route: 'bind_qrcode',
+      component: '/tobacco/bind_qrcode/index.tsx',
+    },
+  ],
+};
 
 export const PERMISSION_LIST = [
   // DASHBOARD_PERMISSION,
@@ -541,10 +550,11 @@ const TEST_ROLE = {
   order: 2,
   desc: 'test',
   permission: [
-    // DASHBOARD_PERMISSION, 
+    // DASHBOARD_PERMISSION,
     // COMPONENTS_PERMISSION,
-    //  FUNCTIONS_PERMISSION, 
-     TOBACCO],
+    //  FUNCTIONS_PERMISSION,
+    TOBACCO,
+  ],
 };
 export const ROLE_LIST = [ADMIN_ROLE, TEST_ROLE];
 

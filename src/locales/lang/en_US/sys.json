@@ -136,7 +136,8 @@
       "tobacco": "tobacco",
       "oven": "oven",
       "roast": "roast",
-      "roast_review": "roast_review"
+      "roast_review": "roast_review",
+      "bind_qrcode": "bind_qrcode"
     },
     "docs": "Document"
   }

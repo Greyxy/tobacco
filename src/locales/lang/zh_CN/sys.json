@@ -135,7 +135,8 @@
       "tobacco": "烟草",
       "oven": "烤房信息",
       "roast": "烘烤数据",
-      "roast_review": "烘烤数据审核"
+      "roast_review": "烘烤数据审核",
+      "bind_qrcode": "绑定二维码"
     },
     "docs": "文档"
   }
