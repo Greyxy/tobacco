@@ -46,6 +46,7 @@ axiosInstance.interceptors.response.use(
     // status
     // : 
     //     200
+    if (typeof res.data != 'object') return res.data
     const { status, data, msg } = res.data;
     // 业务请求成功
     const hasSuccess = Reflect.has(res.data, 'status') && status === ResultEnum.SUCCESS;

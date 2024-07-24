@@ -23,6 +23,7 @@ export enum TobaccoApi {
   getQrCodeById = '/qrcode/getById?id=',
   updateQrCode = '/qrcode/update',
   saveRoomCode = '/room/saveRoomCode',
+  downloadImg = 'img/getCode',
   // 登录
   login = '/user/login',
 }
@@ -47,6 +48,7 @@ const deleteQrCodeById = (id: string) =>
 const getQrCodeById = (id: string) => apiClient.get({ url: `${TobaccoApi.getQrCodeById}${id}` });
 const updateQrCode = (data) => apiClient.post({ url: `${TobaccoApi.updateQrCode}`, data });
 const saveRoomCode = (data) => apiClient.post({ url: `${TobaccoApi.saveRoomCode}`, data });
+const downloadImg = (data) => apiClient.post({ url: `${TobaccoApi.downloadImg}`, data })
 export default {
   getRoomById,
   updateRoom,
@@ -62,4 +64,5 @@ export default {
   getQrCodeById,
   updateQrCode,
   saveRoomCode,
+  downloadImg
 };
