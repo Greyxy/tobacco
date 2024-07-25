@@ -1,6 +1,6 @@
 import { message as Message } from 'antd';
 import axios, { AxiosRequestConfig, AxiosError, AxiosResponse } from 'axios';
-
+import { message } from 'antd';
 import { t } from '@/locales/i18n';
 import userStore from '@/store/userStore';
 
@@ -37,21 +37,15 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
   (res: AxiosResponse<Result>) => {
     if (!res.data) throw new Error(t('sys.api.apiRequestFailed'));
-    //     data
-    // : 
-    // "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJuZW8iLCJ1aWQiOjEsImNpdHlOYW1lIjoi6LaK6KW_5Y6_IiwiZXhwIjoxNzIxNjY1MjI4fQ.bJnuA1hf2NUNye9A0DcjCZLpfV6n66YqAQBmikjBWGc"
-    // msg
-    // : 
-    // "操作成功"
-    // status
-    // : 
-    //     200
+
     if (typeof res.data != 'object') return res.data
     const { status, data, msg } = res.data;
     // 业务请求成功
     const hasSuccess = Reflect.has(res.data, 'status') && status === ResultEnum.SUCCESS;
     if (hasSuccess) {
       return data;
+    } else {
+      message.error(`Error: ${msg}`);
     }
 
     // 业务请求错误

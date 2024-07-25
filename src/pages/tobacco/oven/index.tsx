@@ -45,6 +45,7 @@ function parseTime(data) {
 export default function index() {
   const [tableData, setTableData] = useState<TableData[]>([])
   const [roomIdList, setRoomIdList] = useState<String[]>([])
+  const [roomCodeList, setRoomCodeList] = useState([])
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingRecord, setEditingRecord] = useState<TableData>();
   const [messageApi, contextHolder] = message.useMessage();
@@ -80,8 +81,7 @@ export default function index() {
         item.createTime = parseTime(item.createTime)
       })
       setTableData(res)
-      const list: String[] = res.map((x: TableData) => x.id)
-      setRoomIdList(list)
+      setRoomCodeList(res.map((x: TableData) => x.code))
     })
   }
   const { colorPrimary } = useThemeToken()
@@ -245,7 +245,7 @@ export default function index() {
   const onFinish = (values: any) => {
     console.log('form values', values)
     if (values.smokeHouse) {
-
+      // let { id } = tableData.find(x => x.code == values.smokeHouse)
       tobaccoService.getRoomById(values.smokeHouse).then(res => {
         setTableData([res])
       })
@@ -265,17 +265,18 @@ export default function index() {
           name="smokeHouse"
           label="烟房"
         >
-          <Select
+          {/* <Select
             placeholder="请选择烟房"
             style={{ width: 200 }}
             allowClear={true}
           >
             {
-              roomIdList.map((x, index) => {
+              roomCodeList.map((x, index) => {
                 return <Option key={index} value={x}>{x}</Option>
               })
             }
-          </Select>
+          </Select> */}
+          <Input />
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit" >

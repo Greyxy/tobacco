@@ -3,7 +3,7 @@ import { App } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { create } from 'zustand';
 
-import userService, { SignInReq } from '@/api/services/userService';
+import { SignInReq } from '@/api/services/userService';
 import tobaccoService from '@/api/services/tobaccoService';
 import { getItem, removeItem, setItem } from '@/utils/storage';
 

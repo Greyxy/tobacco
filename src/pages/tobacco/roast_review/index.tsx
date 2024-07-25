@@ -173,7 +173,12 @@ export default function index() {
     }
 
   };
-
+  const handleCancel = () => {
+    setIsModalVisible(false)
+  }
+  const handleOk = () => {
+    setIsModalVisible(false);
+  }
   return (
     <>
       {contextHolder}
@@ -209,7 +214,8 @@ export default function index() {
           scroll={{ x: true }}
         />
       </div>
-      <Modal title='审核数据' open={isModalVisible} footer={null} centered={true}>
+      <Modal title='审核数据' open={isModalVisible} footer={null} centered={true} onOk={handleOk}
+        onCancel={handleCancel}>
         <Form onFinish={onReviewFinish} initialValues={{ status: '1' }}>
           <Form.Item name="status">
             <Radio.Group>
