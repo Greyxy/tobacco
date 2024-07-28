@@ -591,7 +591,7 @@ export default function index() {
     let id = selectedRow.id
     if (values.status == 'approved') {
       tobaccoService.reviewBacking(id + '').then(res => {
-        getRoomData(status, pagination.current, pagination.pageSize)
+        getRoomData(values, pagination.current, pagination.pageSize)
         setIsModalVisible(false)
         messageApi.open({
           type: 'success',
@@ -600,7 +600,7 @@ export default function index() {
       })
     } else {
       tobaccoService.refuseBacking(id + '').then(res => {
-        getRoomData(status, pagination.current, pagination.pageSize)
+        getRoomData(values, pagination.current, pagination.pageSize)
         setIsModalVisible(false)
         messageApi.open({
           type: 'success',

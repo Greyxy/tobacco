@@ -260,12 +260,12 @@ export default function index() {
       // dataIndex: 'farmer.farmerName',
       key: 'farmer',
       render: (record) => {
-        return <span>{record?.farmer?.farmerName || ''}</span>
+        return <span>{record?.farmer?.name || ''}</span>
       }
     },
     {
       title: '采集人', key: 'collect', render: (record) => {
-        return <span>{record?.collect?.collectName || ''}</span>
+        return <span>{record?.collector?.name || ''}</span>
       }
     },
     {

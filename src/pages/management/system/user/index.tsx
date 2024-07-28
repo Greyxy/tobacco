@@ -54,6 +54,14 @@ export default function RolePage() {
     })
   }
   const onEdit = (record) => {
+    let user = JSON.parse(localStorage.getItem('user'))
+    if (user.userName == record.usedrName) {
+      message.open({
+        type: 'warning',
+        content: '不允许修改本人账号'
+      })
+      return
+    }
     setTitle('编辑用户');
     form.resetFields()
     setUserForm(record);
@@ -72,7 +80,7 @@ export default function RolePage() {
 
   const columns: ColumnsType<UserInfo> = [
     {
-      title: 'Name',
+      title: '姓名',
       dataIndex: 'name',
       width: 180,
       render: (_, record) => {
@@ -91,12 +99,6 @@ export default function RolePage() {
     {
       title: '角色',
       dataIndex: 'roleName',
-      align: 'center',
-      width: 120,
-    },
-    {
-      title: '姓名',
-      dataIndex: 'userName',
       align: 'center',
       width: 120,
     },
@@ -121,11 +123,10 @@ export default function RolePage() {
     {
       title: '状态',
       dataIndex: 'status',
-      align: 'center',
       width: 120,
       render: (status) => (
-        <ProTag color={status === 0 ? 'error' : 'success'}>
-          {status === 0 ? '禁用' : '正常'}
+        <ProTag color={status == 0 ? 'error' : 'success'}>
+          {status == 0 ? '禁用' : '正常'}
         </ProTag>
       ),
     },
@@ -202,9 +203,13 @@ export default function RolePage() {
 
   };
   const onSearchHanle = (values) => {
-    tobaccoService.findUser(values.userName).then(res => {
-      setTableData(res)
-    })
+    if (values.userName) {
+      tobaccoService.findUser(values.userName).then(res => {
+        setTableData(res)
+      })
+    } else {
+      getUserList()
+    }
   }
   const handleCancel = () => {
     form.resetFields();
@@ -225,13 +230,14 @@ export default function RolePage() {
         </Form.Item>
       </Form>
       <Card
-        title="User List"
+        title="用户列表"
         extra={
           <Button type="primary" onClick={onAddUser}>
             新增
           </Button>
         }
-        className="mt-6"
+        // className="mt-0.5"
+        style={{ marginTop: '2px' }}
       >
         <Table
           rowKey="id"
