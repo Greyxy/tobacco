@@ -75,34 +75,34 @@ const MANAGEMENT_PERMISSION = {
   route: 'management',
   order: 2,
   children: [
-    {
-      id: '2781684678535711',
-      parentId: '0901673425580518',
-      label: 'sys.menu.user.index',
-      name: 'User',
-      type: PermissionType.CATALOGUE,
-      route: 'user',
-      children: [
-        {
-          id: '4754063958766648',
-          parentId: '2781684678535711',
-          label: 'sys.menu.user.profile',
-          name: 'Profile',
-          type: PermissionType.MENU,
-          route: 'profile',
-          component: '/management/user/profile/index.tsx',
-        },
-        {
-          id: '2516598794787938',
-          parentId: '2781684678535711',
-          label: 'sys.menu.user.account',
-          name: 'Account',
-          type: PermissionType.MENU,
-          route: 'account',
-          component: '/management/user/account/index.tsx',
-        },
-      ],
-    },
+    // {
+    //   id: '2781684678535711',
+    //   parentId: '0901673425580518',
+    //   label: 'sys.menu.user.index',
+    //   name: 'User',
+    //   type: PermissionType.CATALOGUE,
+    //   route: 'user',
+    //   children: [
+    //     {
+    //       id: '4754063958766648',
+    //       parentId: '2781684678535711',
+    //       label: 'sys.menu.user.profile',
+    //       name: 'Profile',
+    //       type: PermissionType.MENU,
+    //       route: 'profile',
+    //       component: '/management/user/profile/index.tsx',
+    //     },
+    //     {
+    //       id: '2516598794787938',
+    //       parentId: '2781684678535711',
+    //       label: 'sys.menu.user.account',
+    //       name: 'Account',
+    //       type: PermissionType.MENU,
+    //       route: 'account',
+    //       component: '/management/user/account/index.tsx',
+    //     },
+    //   ],
+    // },
     {
       id: '0249937641030250',
       parentId: '0901673425580518',
@@ -111,24 +111,24 @@ const MANAGEMENT_PERMISSION = {
       type: PermissionType.CATALOGUE,
       route: 'system',
       children: [
-        {
-          id: '1985890042972842',
-          parentId: '0249937641030250',
-          label: 'sys.menu.system.organization',
-          name: 'Organization',
-          type: PermissionType.MENU,
-          route: 'organization',
-          component: '/management/system/organization/index.tsx',
-        },
-        {
-          id: '4359580910369984',
-          parentId: '0249937641030250',
-          label: 'sys.menu.system.permission',
-          name: 'Permission',
-          type: PermissionType.MENU,
-          route: 'permission',
-          component: '/management/system/permission/index.tsx',
-        },
+        // {
+        //   id: '1985890042972842',
+        //   parentId: '0249937641030250',
+        //   label: 'sys.menu.system.organization',
+        //   name: 'Organization',
+        //   type: PermissionType.MENU,
+        //   route: 'organization',
+        //   component: '/management/system/organization/index.tsx',
+        // },
+        // {
+        //   id: '4359580910369984',
+        //   parentId: '0249937641030250',
+        //   label: 'sys.menu.system.permission',
+        //   name: 'Permission',
+        //   type: PermissionType.MENU,
+        //   route: 'permission',
+        //   component: '/management/system/permission/index.tsx',
+        // },
         {
           id: '1689241785490759',
           parentId: '0249937641030250',
@@ -159,6 +159,7 @@ const MANAGEMENT_PERMISSION = {
         },
       ],
     },
+
   ],
 };
 const COMPONENTS_PERMISSION = {
@@ -521,7 +522,7 @@ const TOBACCO = {
 
 export const PERMISSION_LIST = [
   // DASHBOARD_PERMISSION,
-  // MANAGEMENT_PERMISSION,
+  MANAGEMENT_PERMISSION,
   // COMPONENTS_PERMISSION,
   // FUNCTIONS_PERMISSION,
   // MENU_LEVEL_PERMISSION,

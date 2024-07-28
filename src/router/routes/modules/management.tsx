@@ -30,28 +30,28 @@ const management: AppRouteObject = {
   children: [
     {
       index: true,
-      element: <Navigate to="user" replace />,
+      element: <Navigate to="system" replace />,
     },
-    {
-      path: 'user',
-      meta: { label: 'sys.menu.user.index', key: '/management/user' },
-      children: [
-        {
-          index: true,
-          element: <Navigate to="profile" replace />,
-        },
-        {
-          path: 'profile',
-          element: <ProfilePage />,
-          meta: { label: 'sys.menu.user.profile', key: '/management/user/profile' },
-        },
-        {
-          path: 'account',
-          element: <AccountPage />,
-          meta: { label: 'sys.menu.user.account', key: '/management/user/account' },
-        },
-      ],
-    },
+    // {
+    //   path: 'user',
+    //   meta: { label: 'sys.menu.user.index', key: '/management/user' },
+    //   children: [
+    //     {
+    //       index: true,
+    //       element: <Navigate to="profile" replace />,
+    //     },
+    //     {
+    //       path: 'profile',
+    //       element: <ProfilePage />,
+    //       meta: { label: 'sys.menu.user.profile', key: '/management/user/profile' },
+    //     },
+    //     {
+    //       path: 'account',
+    //       element: <AccountPage />,
+    //       meta: { label: 'sys.menu.user.account', key: '/management/user/account' },
+    //     },
+    //   ],
+    // },
     {
       path: 'system',
       meta: { label: 'sys.menu.system.index', key: '/management/system' },

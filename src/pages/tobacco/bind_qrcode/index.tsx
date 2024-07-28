@@ -111,8 +111,8 @@ export default function BindQrCode() {
   return (
     <>
       {contextHolder}
-      <Tabs defaultActiveKey="1" items={items} onChange={onChange} />
-
+      {/* <Tabs defaultActiveKey="1" items={items} onChange={onChange} /> */}
+      <QrCode></QrCode>
 
       <Modal
         title="绑定数据"

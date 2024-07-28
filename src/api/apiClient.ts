@@ -6,6 +6,7 @@ import userStore from '@/store/userStore';
 
 import { Result } from '#/api';
 import { ResultEnum } from '#/enum';
+import { useNavigate } from 'react-router-dom';
 
 // 创建 axios 实例
 const axiosInstance = axios.create({
@@ -36,12 +37,27 @@ axiosInstance.interceptors.request.use(
 // 响应拦截
 axiosInstance.interceptors.response.use(
   (res: AxiosResponse<Result>) => {
+    // const router = useRouter();
     if (!res.data) throw new Error(t('sys.api.apiRequestFailed'));
 
     if (typeof res.data != 'object') return res.data
     const { status, data, msg } = res.data;
+    if (status == 30100) {
+      message.error('Token失效，请重新登录');
+      // const navigate = useNavigate();
+      // navigate.push('/login'); // 跳转到登录页
+      window.location.href = '/login';
+      localStorage.clear()
+      // router.replace('/login')
+      return
+    } else if (status == 40000) {
+      // 服务器错误
+      message.error('error: 服务器错误-');
+      return
+    }
     // 业务请求成功
-    const hasSuccess = Reflect.has(res.data, 'status') && status === ResultEnum.SUCCESS;
+    //  && status === ResultEnum.SUCCESS
+    const hasSuccess = Reflect.has(res.data, 'status');
     if (hasSuccess) {
       return data;
     } else {

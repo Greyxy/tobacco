@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Form, Input, Button, Table, Space, Select, DatePicker, Image } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
-import { useThemeToken } from '@/theme/hooks';
 import tobaccoService from '@/api/services/tobaccoService';
+import AsyncImage from '@/pages/components/asyncImage';
+
 const { Option } = Select;
 interface TableData {
   id: string;
@@ -28,8 +29,8 @@ interface TableData {
   isMainCollector: number;
   collectorId: number;
   submitTime: string; // datetime
-  modifyTime: string; // datetime
-  createTime: string; // datetime
+  // modifyTime: string; // datetime
+  // createTime: string; // datetime
 }
 function parseTime(data) {
   const date = new Date(data);
@@ -43,22 +44,13 @@ function parseTime(data) {
   const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   return formattedDate
 }
-const queryObject = {
-  roomId: "",
+var queryObject = {
+  // roomId: "",
   startTime: "",
   endTime: "",
-  farmerId: "",
-  collectorId: ""
+  farmerName: "",
+  collectorName: ""
 };
-
-const labels = {
-  roomId: "房间id",
-  startTime: "开始时间",
-  endTime: "结束时间",
-  farmerId: "烟农id",
-  collectorId: "采集人id"
-};
-
 export default function index() {
   const columns: ColumnsType<TableData> = [
     { title: '烤房id', dataIndex: 'roomId', key: 'roomId' },
@@ -67,6 +59,19 @@ export default function index() {
     { title: '烘烤天数', dataIndex: 'days', key: 'days' },
     { title: '炕次', dataIndex: 'sequence', key: 'sequence' },
     { title: '部位', dataIndex: 'part', key: 'part' },
+    {
+      title: '烟农',
+      // dataIndex: 'farmer.farmerName',
+      key: 'farmer',
+      render: (record) => {
+        return <span>{record?.farmer?.name || ''}</span>
+      }
+    },
+    {
+      title: '采集人', key: 'collector', render: (record) => {
+        return <span>{record?.collector?.name || ''}</span>
+      }
+    },
     { title: '夹烟工具', dataIndex: 'tool', key: 'tool' },
     { title: '总竿数', dataIndex: 'totalPoleAmount', key: 'totalPoleAmount' },
     { title: '总重量', dataIndex: 'totalWeight', key: 'totalWeight' },
@@ -79,26 +84,23 @@ export default function index() {
     { title: '纬度', dataIndex: 'latitude', key: 'latitude' },
     {
       title: '图片',
+      // dataIndex: 'imgs',
       key: 'imgs',
-      render: (text: string, record) => {
-        if (!record.imgs) {
+      render: ({ imgs }) => {
+        console.log(imgs)
+        if (!imgs) {
           return <span>暂无数据</span>
-        } else if (typeof record.imgs == 'string') {
-          return <Image src={record.imgs} alt="img" width={100} />
-        } else {
-          return <Image.PreviewGroup items={record.imgs}>
-            <Image width={100} src={record.imgs[0]} />
-          </Image.PreviewGroup>
         }
+        return <AsyncImage src={imgs} />;
       },
+
     },
     { title: '烤房绑定烟农', dataIndex: 'isMainFarmer', key: 'isMainFarmer' },
-    { title: '烟农id', dataIndex: 'farmerId', key: 'farmerId' },
+
     { title: '烤房绑定填报人', dataIndex: 'isMainCollector', key: 'isMainCollector' },
-    { title: '采集人id', dataIndex: 'collectorId', key: 'collectorId' },
     { title: '填报时间', dataIndex: 'submitTime', key: 'submitTime' },
-    { title: '修改时间', dataIndex: 'modifyTime', key: 'modifyTime' },
-    { title: '创建时间', dataIndex: 'createTime', key: 'createTime' },
+    // { title: '修改时间', dataIndex: 'modifyTime', key: 'modifyTime' },
+    // { title: '创建时间', dataIndex: 'createTime', key: 'createTime' },
   ];
 
   columns.forEach(item => item.align = 'center')
@@ -108,34 +110,59 @@ export default function index() {
     // console.log('Form values:', values, queryObject);
     const formattedValues = {
       ...values,
-      startTime: values.startTime ? values.startTime.format('YYYY-MM-DD HH:mm:ss') : null,
-      endTime: values.endTime ? values.endTime.format('YYYY-MM-DD HH:mm:ss') : null,
+      startTime: values.startTime ? values.startTime.format('YYYY-MM-DD') : null,
+      endTime: values.endTime ? values.endTime.format('YYYY-MM-DD') : null,
     };
-    console.log(formattedValues)
-    getRoomData(formattedValues)
+    queryObject = formattedValues
+    getRoomData(formattedValues, pagination.current, pagination.pageSize)
   };
   const [tableData, setTableData] = useState<TableData[]>([])
   const [roomIdList, setRoomIdList] = useState<String[]>([])
   const [farmerIdList, setFarmerIdList] = useState([])
   const [collectorIdList, setCollectIdList] = useState([])
+  const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
+  const [key, setKey] = useState()
+
   useEffect(() => {
-    getRoomData(queryObject)
+    getRoomData(queryObject, pagination.current, pagination.pageSize)
   }, [])
-  const getRoomData = (data: any) => {
-    tobaccoService.backingQuery(data).then(res => {
-      res.forEach((item: TableData) => {
-        item.modifyTime = parseTime(item.modifyTime)
-        item.createTime = parseTime(item.createTime)
+  const getRoomData = (data: any, page: number, pageSize: number) => {
+    tobaccoService.backingQuery({ ...data, currentPage: page, pageSize }).then(res => {
+      setPagination({ ...pagination, current: page, pageSize, total: res.total })
+      res = res.records
+      let currentIndex = 0
+      res.forEach(async (item: TableData, index) => {
         item.submitTime = parseTime(item.submitTime)
         item.startTime = parseTime(item.startTime)
         item.endTime = parseTime(item.endTime)
+        if (item.imgs) {
+          let imgs = JSON.parse(item.imgs)
+          if (typeof imgs == 'object') {
+            const imgUrls = await Promise.all(imgs.map((x: string) => tobaccoService.getImgUrl(x)))
+            imgUrls.forEach(item => item.replace(' ', ''))
+            item.imgs = imgUrls
+          }
+        }
+        currentIndex = index
       })
+      let timer = setInterval(() => {
+        if (currentIndex = res.length - 1) {
+          clearInterval(timer)
+          setTableData(res)
+          setKey(new Date().getTime())
+        }
+      }, 100)
+      setKey(new Date().getTime())
       setTableData(res)
       setRoomIdList(res.map((x: TableData) => x.roomId))
       setFarmerIdList(res.map((x: TableData) => x.farmerId))
       setCollectIdList(res.map((x: TableData) => x.collectorId))
     })
   }
+  const handleTableChange = (pagination: any) => {
+    getRoomData(queryObject, pagination.current, pagination.pageSize)
+  }
+
   return (
     <div>
       <Form
@@ -145,7 +172,7 @@ export default function index() {
         initialValues={queryObject}
         layout="inline"
       >
-        <Form.Item label="房间id" name='roomId'>
+        {/* <Form.Item label="房间id" name='roomId'>
           <Select allowClear={true} style={{ width: 200 }}>
             {
               roomIdList.map((x, index) => {
@@ -153,30 +180,32 @@ export default function index() {
               })
             }
           </Select>
-        </Form.Item>
+        </Form.Item> */}
         <Form.Item label="开始时间" name='startTime'>
-          <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" />
-        </Form.Item>
+          <DatePicker format="YYYY-MM-DD" />
+        </Form.Item >
         <Form.Item label="结束时间" name='endTime'>
-          <DatePicker showTime format="YYYY-MM-DD HH:mm:ss" />
+          <DatePicker format="YYYY-MM-DD" />
         </Form.Item>
-        <Form.Item label="烟农id" name='farmerId'>
-          <Select allowClear={true} style={{ width: 200 }}>
+        <Form.Item label="烟农" name='farmerName'>
+          {/* <Select allowClear={true} style={{ width: 200 }}>
             {
               farmerIdList.map((x, index) => {
                 return <Option key={index} value={x}>{x}</Option>
               })
             }
-          </Select>
+          </Select> */}
+          <Input allowClear={true} />
         </Form.Item>
-        <Form.Item label="采集人id" name='collectorId'>
-          <Select allowClear={true} style={{ width: 200 }}>
+        <Form.Item label="采集人" name='collectorName'>
+          {/* <Select allowClear={true} style={{ width: 200 }}>
             {
               collectorIdList.map((x, index) => {
                 return <Option key={index} value={x}>{x}</Option>
               })
             }
-          </Select>
+          </Select> */}
+          <Input allowClear={true} />
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit">
@@ -189,14 +218,11 @@ export default function index() {
         columns={columns}
         dataSource={tableData}
         rowKey="id"
+        key={key}
         className='whitespace-nowrap mt-6'
         scroll={{ x: true }}
-        pagination={{
-          pageSize: 5,
-          total: tableData.length,
-          showQuickJumper: true,
-          showTotal: _ => `共${tableData.length}条`
-        }}
+        onChange={handleTableChange}
+        pagination={pagination}
       />
     </div>
   );

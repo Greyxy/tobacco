@@ -1,5 +1,5 @@
 import tobaccoService, { TobaccoApi } from '@/api/services/tobaccoService';
-import { Button, Col, Form, Modal, Row, Select, Space, Table, message, Tabs } from 'antd';
+import { Button, Col, Form, Modal, Row, Select, Space, Table, message, Tabs, QRCode } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useEffect, useState } from 'react';
 const { Option } = Select;
@@ -29,6 +29,21 @@ interface TableData {
   modifyTime: string;
   createTime: string;
 }
+function parseTime(data) {
+  const date = new Date(data);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // 月份从0开始，需要加1
+  const day = String(date.getDate()).padStart(2, '0');
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  const seconds = String(date.getSeconds()).padStart(2, '0');
+
+  const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
+  return formattedDate
+}
+var queryObject = {
+  remark: ''
+}
 export default function QrCode() {
   const [bindForm] = Form.useForm();
   const [qrCodeData, setQrCodeData] = useState([]);
@@ -40,6 +55,8 @@ export default function QrCode() {
   const [editingRecord, setEditingRecord] = useState<Record<string, any>>();
   const [messageApi, contextHolder] = message.useMessage();
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
+  const [key, setKey] = useState()
   const qrCodeColumns = [
     {
       title: '操作',
@@ -65,6 +82,15 @@ export default function QrCode() {
       dataIndex: 'remark',
       key: 'remark',
       align: 'center',
+    },
+    {
+      title: '二维码',
+      // dataIndex: 'content',
+      key: 'content',
+      align: 'center',
+      render: (record) => {
+        return <QRCode value={record.text} size={120} />
+      }
     },
     {
       title: '重定向URL',
@@ -100,7 +126,7 @@ export default function QrCode() {
     onChange: onSelectChange,
   };
   useEffect(() => {
-    getQrCodeData();
+    getQrCodeData(queryObject, pagination.current, pagination.pageSize);
     getRoomData()
   }, []);
   const onQrcodeFinish = (values: any) => {
@@ -110,15 +136,24 @@ export default function QrCode() {
         setQrCodeData([res]);
       });
     } else {
-      getQrCodeData()
+      getQrCodeData(queryObject, pagination.current, pagination.pageSize)
     }
   };
-  const getQrCodeData = () => {
-    tobaccoService.getQrCode().then((res) => {
+  const getQrCodeData = (data, page, pageSize) => {
+    tobaccoService.getQrCode({ ...data, page, pageSize }).then((res) => {
+      setPagination({ ...pagination, current: page, pageSize, total: res.total })
+      res = res.records
       setRemarkList(res.map((x) => x.remark));
+      res.forEach(item => {
+        item.modifyTime = parseTime(item.modifyTime)
+        item.createTime = parseTime(item.createTime)
+      })
       setQrCodeData(res);
     });
   };
+  const handleTableChange = (pagination: any) => {
+    getQrCodeData(queryObject, pagination.current, pagination.pageSize)
+  }
   const downloadQrCode = async () => {
     if (!selectedRowKeys.length) {
       messageApi.open({
@@ -154,8 +189,8 @@ export default function QrCode() {
     }
   }
   const getRoomData = () => {
-    tobaccoService.getRoomByArea().then((res: TableData[]) => {
-
+    tobaccoService.getRoomByArea({ currentPage: 1, pageSize: 999 }).then((res: TableData[]) => {
+      res = res.records
       setTableData(res);
       setRoomIdList(res.map((x) => x.id));
       setRoomCodeList(res.map((x) => x.code));
@@ -219,7 +254,7 @@ export default function QrCode() {
     <div>
       {contextHolder}
       <div className='flex justify-between'>
-        <Form name="search_qr_form" layout="inline" onFinish={onQrcodeFinish}>
+        <Form name="search_qr_form" layout="inline" onFinish={onQrcodeFinish} initialValues={queryObject}>
           <Form.Item name="remark" label="备注">
             <Select placeholder="" style={{ width: 200 }} allowClear>
               {remarkList.map((x, index) => (
@@ -247,6 +282,8 @@ export default function QrCode() {
         rowKey="id"
         className="mt-6 whitespace-nowrap"
         scroll={{ x: true }}
+        onChange={handleTableChange}
+        pagination={pagination}
       />
       <Modal
         title="绑定数据"

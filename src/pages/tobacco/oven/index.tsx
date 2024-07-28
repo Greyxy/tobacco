@@ -3,6 +3,7 @@ import { Button, Space, Table, Form, Select, Input, Modal, Row, Col, message, Im
 import type { ColumnsType } from 'antd/es/table';
 import { useThemeToken } from '@/theme/hooks';
 import tobaccoService from '@/api/services/tobaccoService';
+import AsyncImage from '@/pages/components/asyncImage';
 const { Option } = Select;
 interface TableData {
   id: string,
@@ -24,7 +25,7 @@ interface TableData {
   replaceYear: string;
   longitude: string;
   latitude: string;
-  imgs: string;
+  imgs: string | string[];
   farmerId: string;
   collectorId: string;
   modifyTime: string;
@@ -42,19 +43,40 @@ function parseTime(data) {
   const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
   return formattedDate
 }
+var queryObject = {
+  roomCode: "",
+  farmerName: "",
+  collectorName: "",
+  stationName: "",
+};
 export default function index() {
+  const [bindForm] = Form.useForm();
   const [tableData, setTableData] = useState<TableData[]>([])
   const [roomIdList, setRoomIdList] = useState<String[]>([])
   const [roomCodeList, setRoomCodeList] = useState([])
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingRecord, setEditingRecord] = useState<TableData>();
   const [messageApi, contextHolder] = message.useMessage();
-
+  const [isModalBindVisible, setIsModalBindVisible] = useState(false);
+  const [qrCodeData, setQrCodeData] = useState([]);
+  const [remarkList, setRemarkList] = useState<string[]>([]);
+  const [loading, setLoading] = useState(false)
+  const [key, setKey] = useState()
+  const [pagination, setPagination] = useState({ current: 1, pageSize: 8, total: 0, })
   const handleOk = () => {
     setIsModalVisible(false);
   };
   const handleCancel = () => {
     setIsModalVisible(false);
+  };
+  const handleBindOk = () => {
+    setIsModalBindVisible(false);
+    bindForm.resetFields();
+  };
+
+  const handleBindCancel = () => {
+    setIsModalBindVisible(false);
+    bindForm.resetFields();
   };
   const handleFinish = (values: TableData) => {
     let index = tableData.findIndex(x => x.code == values.code)
@@ -67,19 +89,76 @@ export default function index() {
         type: 'success',
         content: '修改成功',
       });
-      getRoomData()
+      getRoomData(queryObject, pagination.current, pagination.pageSize)
       setIsModalVisible(false);
     })
   };
+  const handleBindFinish = (values: any) => {
+    const { roomCode, remark } = values;
+    if (!roomCode || !remark) {
+      messageApi.open({
+        type: 'error',
+        content: '请选择房间和二维码',
+      });
+      return;
+    }
+
+    const room = tableData.find((x) => x.code === roomCode);
+    const qrCode = qrCodeData.find((x) => x.remark === remark);
+
+    if (room && qrCode) {
+      const obj = {
+        roomCode: room.code,
+        roomId: room.id,
+        qrCodeId: qrCode.id,
+      };
+      tobaccoService.saveRoomCode(obj).then(() => {
+        messageApi.open({
+          type: 'success',
+          content: '绑定成功',
+        });
+        bindForm.resetFields();
+        getRoomData(queryObject, pagination.current, pagination.pageSize);
+
+        setIsModalBindVisible(false);
+      });
+    }
+  };
   useEffect(() => {
-    getRoomData()
+    getRoomData(queryObject, pagination.current, pagination.pageSize)
+    getQrCodeData()
   }, [])
-  const getRoomData = () => {
-    tobaccoService.getRoomByArea().then(res => {
-      res.forEach((item: TableData) => {
-        item.modifyTime = parseTime(item.modifyTime)
-        item.createTime = parseTime(item.createTime)
+  const getRoomData = (data, current, pageSize) => {
+    console.log({ ...data, current, pageSize })
+    tobaccoService.getRoomByArea({ ...data, currentPage: current, pageSize }).then(res => {
+      setPagination({ ...pagination, current, pageSize, total: res.total })
+
+      setLoading(false)
+      let currentIndex = 0
+      res = res.records
+      res.forEach(async (item: TableData, index) => {
+        // item.modifyTime = parseTime(item.modifyTime)
+        // item.createTime = parseTime(item.createTime)
+        if (item.imgs) {
+          let imgs = JSON.parse(item.imgs)
+          if (typeof imgs == 'object') {
+            const imgUrls = await Promise.all(imgs.map((x: string) => tobaccoService.getImgUrl(x)))
+            imgUrls.forEach(item => item.replace(' ', ''))
+            item.imgs = imgUrls
+          }
+        }
+        currentIndex = index
       })
+      let timer = setInterval(() => {
+        if (currentIndex = res.length - 1) {
+          clearInterval(timer)
+          setTableData(res)
+          console.log(res)
+          setKey(new Date().getTime())
+        }
+      }, 100)
+      setLoading(true)
+      setKey(new Date().getTime())
       setTableData(res)
       setRoomCodeList(res.map((x: TableData) => x.code))
     })
@@ -98,6 +177,9 @@ export default function index() {
       render: (_, record) => (
         <Space size="middle">
           <Button type="link" onClick={() => handleEdit(record)} style={{ color: colorPrimary }}>修改</Button>
+          {/* <Button type="link" onClick={() => handleBindQrCode(record)} >
+            绑定二维码
+          </Button> */}
         </Space>
       ),
     },
@@ -160,13 +242,31 @@ export default function index() {
     },
     {
       title: '是否完好',
-      dataIndex: 'isIntact',
+      // dataIndex: 'isIntact',
       key: 'isIntact',
+      render: (record: any) => {
+        return (
+          record.isIntact == 1 ? <span>是</span> : <span>否</span>
+        )
+      }
     },
     {
       title: '烤房使用权属',
       dataIndex: 'usageRight',
       key: 'usageRight',
+    },
+    {
+      title: '烟农',
+      // dataIndex: 'farmer.farmerName',
+      key: 'farmer',
+      render: (record) => {
+        return <span>{record?.farmer?.farmerName || ''}</span>
+      }
+    },
+    {
+      title: '采集人', key: 'collect', render: (record) => {
+        return <span>{record?.collect?.collectName || ''}</span>
+      }
     },
     {
       title: '设备厂家',
@@ -202,56 +302,56 @@ export default function index() {
       title: '图片',
       // dataIndex: 'imgs',
       key: 'imgs',
-      render: (text: string, record) => {
-        if (!record.imgs) {
+      render: ({ imgs }) => {
+        console.log(imgs)
+        if (!imgs) {
           return <span>暂无数据</span>
-        } else if (typeof record.imgs == 'string') {
-          return <Image src={record.imgs} alt="img" width={100} />
-        } else {
-          // 数组
-          return <Image.PreviewGroup
-            items={record.imgs}
-          >
-            <Image
-              width={100}
-              src={record.imgs[0]}
-            />
-          </Image.PreviewGroup>
         }
+        return <AsyncImage src={imgs} />;
       },
+
     },
-    {
-      title: '受益人',
-      dataIndex: 'farmerId',
-      key: 'farmerId',
-    },
-    {
-      title: '采集人',
-      dataIndex: 'collectorId',
-      key: 'collectorId',
-    },
-    {
-      title: '修改时间',
-      dataIndex: 'modifyTime',
-      key: 'modifyTime',
-    },
-    {
-      title: '创建时间',
-      dataIndex: 'createTime',
-      key: 'createTime',
-    },
+    // {
+    //   title: '修改时间',
+    //   dataIndex: 'modifyTime',
+    //   key: 'modifyTime',
+    // },
+    // {
+    //   title: '创建时间',
+    //   dataIndex: 'createTime',
+    //   key: 'createTime',
+    // },
   ];
   columns.forEach(item => item.align = 'center')
   const onFinish = (values: any) => {
-    console.log('form values', values)
-    if (values.smokeHouse) {
-      // let { id } = tableData.find(x => x.code == values.smokeHouse)
-      tobaccoService.getRoomById(values.smokeHouse).then(res => {
-        setTableData([res])
-      })
-    } else {
-      getRoomData()
-    }
+    getRoomData(values, pagination.current, pagination.pageSize)
+    queryObject = values
+
+  }
+  const handleBindQrCode = (record: any) => {
+    bindForm.resetFields();
+
+    const obj = {
+      roomCode: record.code,
+      roomId: record.id || '',
+      qrCodeId: '',
+      remark: record.remark || '',
+    };
+
+    setIsModalBindVisible(true);
+    setEditingRecord(obj);
+  };
+  const getQrCodeData = () => {
+    tobaccoService.getQrCode().then((res) => {
+      setRemarkList(res.records.map((x) => x.remark));
+      setQrCodeData(res);
+    });
+  };
+  const handleTableChange = (pagination, filters, sorter) => {
+    // 获取当前页数
+    const { current, pageSize } = pagination;
+    console.log('Current Page:', current);
+    getRoomData(queryObject, current, pageSize)
   }
   return (
     <>
@@ -260,23 +360,31 @@ export default function index() {
         name="search_form"
         layout="inline"
         onFinish={onFinish}
+        initialValues={queryObject}
       >
         <Form.Item
-          name="smokeHouse"
-          label="烟房"
+          name="roomCode"
+          label="烤房编码"
         >
-          {/* <Select
-            placeholder="请选择烟房"
-            style={{ width: 200 }}
-            allowClear={true}
-          >
-            {
-              roomCodeList.map((x, index) => {
-                return <Option key={index} value={x}>{x}</Option>
-              })
-            }
-          </Select> */}
-          <Input />
+          <Input allowClear={true} />
+        </Form.Item>
+        <Form.Item
+          name="farmerName"
+          label="烟农姓名"
+        >
+          <Input allowClear={true} />
+        </Form.Item>
+        <Form.Item
+          name="collectorName"
+          label="采集人姓名"
+        >
+          <Input allowClear={true} />
+        </Form.Item>
+        <Form.Item
+          name="stationName"
+          label="站点名称"
+        >
+          <Input allowClear={true} />
         </Form.Item>
         <Form.Item>
           <Button type="primary" htmlType="submit" >
@@ -284,13 +392,16 @@ export default function index() {
           </Button>
         </Form.Item>
       </Form>
-      <Table columns={columns}
-        // rowSelection={rowSelection}
+      {loading && <Table
+        columns={columns}
+        key={key}
         dataSource={tableData}
         rowKey='code'
         className='whitespace-nowrap mt-6'
         scroll={{ x: true }}
-      />
+        pagination={pagination}
+        onChange={handleTableChange}
+      />}
 
       <Modal
         title="修改数据"
@@ -316,15 +427,17 @@ export default function index() {
                 <Input />
               </Form.Item>
             </Col>
+
           </Row>
           <Row gutter={16}>
+
             <Col span={12}>
-              <Form.Item name="regionCode" label="行政区划代码">
+              <Form.Item name="type" label="烤房类型">
                 <Input />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="type" label="烤房类型">
+              <Form.Item name="regionCode" label="行政区划代码">
                 <Input />
               </Form.Item>
             </Col>
@@ -414,41 +527,83 @@ export default function index() {
             </Col>
           </Row>
           <Row gutter={16}>
-            <Col span={12}>
+            {/* <Col span={12}>
               <Form.Item name="imgs" label="图片">
                 <Input />
               </Form.Item>
-            </Col>
+            </Col> */}
             <Col span={12}>
               <Form.Item name="farmerId" label="受益人">
                 <Input />
               </Form.Item>
             </Col>
-          </Row>
-          <Row gutter={16}>
             <Col span={12}>
               <Form.Item name="collectorId" label="采集人">
                 <Input />
               </Form.Item>
             </Col>
+          </Row>
+          {/* <Row gutter={16}>
             <Col span={12}>
               <Form.Item name="modifyTime" label="修改时间">
                 <Input />
               </Form.Item>
             </Col>
-          </Row>
-          <Row gutter={16}>
             <Col span={12}>
               <Form.Item name="createTime" label="创建时间">
                 <Input />
               </Form.Item>
             </Col>
+          </Row> */}
+          <Row gutter={16}>
           </Row>
           <Form.Item style={{ textAlign: 'right' }}>
             {/* <Button type="primary" htmlType="cancel" >
               取消
             </Button> */}
             <Button type="primary" htmlType="submit" >
+              确定
+            </Button>
+          </Form.Item>
+        </Form>
+      </Modal>
+      <Modal
+        title="绑定二维码"
+        open={isModalBindVisible}
+        onOk={handleBindOk}
+        onCancel={handleBindCancel}
+        footer={null}
+        width={600}
+        centered
+        afterClose={() => bindForm.resetFields()}
+      >
+        <Form initialValues={editingRecord} onFinish={handleBindFinish} form={bindForm} name='bind_form'>
+          <Row gutter={16}>
+            <Col span={24}>
+              <Form.Item name="roomCode" label="烤房编码">
+                <Select>
+                  {roomCodeList.map((x, index) => (
+                    <Option key={index} value={x}>
+                      {x}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+            <Col span={24}>
+              <Form.Item name="remark" label="二维码备注">
+                <Select>
+                  {remarkList.map((x, index) => (
+                    <Option key={index} value={x}>
+                      {x}
+                    </Option>
+                  ))}
+                </Select>
+              </Form.Item>
+            </Col>
+          </Row>
+          <Form.Item style={{ textAlign: 'right' }}>
+            <Button type="primary" htmlType="submit">
               确定
             </Button>
           </Form.Item>
