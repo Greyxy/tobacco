@@ -3,7 +3,7 @@ import { App } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { create } from 'zustand';
 
-import userService, { SignInReq } from '@/api/services/userService';
+import { SignInReq } from '@/api/services/userService';
 import tobaccoService from '@/api/services/tobaccoService';
 import { getItem, removeItem, setItem } from '@/utils/storage';
 
@@ -63,7 +63,6 @@ export const useSignIn = () => {
   const signIn = async (data: SignInReq) => {
     try {
       const res = await signInMutation.mutateAsync(data);
-      // debugger
       // const { user, accessToken, refreshToken } = res;
       // setUserToken({ accessToken, refreshToken });
       // setUserInfo(user);

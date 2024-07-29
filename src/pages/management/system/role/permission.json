@@ -1,0 +1,72 @@
+[
+  {
+    "id": 1,
+    "name": "CREATE_USER",
+    "remark": "创建用户"
+  },
+  {
+    "id": 2,
+    "name": "DELETE_USER",
+    "remark": "删除用户"
+  },
+  {
+    "id": 3,
+    "name": "UPDATE_USER",
+    "remark": "更新用户信息"
+  },
+  {
+    "id": 4,
+    "name": "ASSIGN_ROLE",
+    "remark": "分配角色"
+  },
+  {
+    "id": 5,
+    "name": "CREATE_ROLE",
+    "remark": "创建角色"
+  },
+  {
+    "id": 6,
+    "name": "SELECT_USER",
+    "remark": "查找用户"
+  },
+  {
+    "id": 7,
+    "name": "DELETE_ROLE",
+    "remark": "删除角色"
+  },
+  {
+    "id": 8,
+    "name": "UPDATE_ROLE",
+    "remark": "更新角色"
+  },
+  {
+    "id": 9,
+    "name": "VIEW_ROLES",
+    "remark": "查看所有角色"
+  },
+  {
+    "id": 10,
+    "name": "VIEW_DATA",
+    "remark": "查看数据"
+  },
+  {
+    "id": 11,
+    "name": "CREATE_DATA",
+    "remark": "创建数据"
+  },
+  {
+    "id": 12,
+    "name": "EDIT_DATA",
+    "remark": "编辑数据"
+  },
+  {
+    "id": 13,
+    "name": "DELETE_DATA",
+    "remark": "删除数据"
+  },
+  {
+    "id": 16,
+    "name": "AUDIT",
+    "remark": "审核"
+  }
+]

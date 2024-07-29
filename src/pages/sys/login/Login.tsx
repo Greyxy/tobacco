@@ -24,7 +24,7 @@ function Login() {
   console.log(locale, 'locale')
   const token = useUserToken();
   const { colorBgElevated } = useThemeToken();
-  const title = window.config.title
+  // const title = window.config.title
   // const { t } = useTranslation();
 
   // 判断用户是否有权限
@@ -48,7 +48,7 @@ function Login() {
           background: bg,
         }}
       >
-        <div className="text-3xl font-bold leading-normal lg:text-4xl xl:text-5xl">{title}</div>
+        <div className="text-3xl font-bold leading-normal lg:text-4xl xl:text-5xl">{window.config.title}</div>
         <img className="max-w-[480px] xl:max-w-[560px]" src={DashboardImg} alt="" />
         {/* <Typography.Text className="flex flex-row gap-[16px] text-2xl">
           {t('sys.login.signInSecondTitle')}
