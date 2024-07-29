@@ -36,7 +36,7 @@ axiosInstance.interceptors.response.use(
   (res: AxiosResponse<Result>) => {
     // const router = useRouter();
     if (!res.data) throw new Error(t('sys.api.apiRequestFailed'));
-
+    debugger
     if (typeof res.data != 'object') return res.data;
     const { status, data, msg } = res.data;
     if (status == 30100) {
@@ -49,9 +49,9 @@ axiosInstance.interceptors.response.use(
       return;
     } else if (status == 40000) {
       // 服务器错误
-      message.error('error: 服务器错误-');
+      message.error('error: 服务器错误');
     } else if (status == 30000) {
-      message.error('error: ', msg);
+      message.error('error: ' + data);
     } else {
       // 业务请求成功
       //  && status === ResultEnum.SUCCESS

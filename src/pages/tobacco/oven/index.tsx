@@ -84,7 +84,8 @@ export default function index() {
       values.id = tableData[index].id;
     }
     console.log(values, index);
-    tobaccoService.updateRoom(values).then((res) => {
+    let obj = { ...values, id: editingRecord.id }
+    tobaccoService.updateRoom(obj).then((res) => {
       messageApi.open({
         type: 'success',
         content: '修改成功',
@@ -258,10 +259,25 @@ export default function index() {
       },
     },
     {
+      title: '烟农号码',
+      // dataIndex: 'farmer.farmerName',
+      key: 'farmer',
+      render: (record) => {
+        return <span>{record?.farmer?.phoneNumber || ''}</span>;
+      },
+    },
+    {
       title: '采集人',
       key: 'collect',
       render: (record) => {
         return <span>{record?.collector?.name || ''}</span>;
+      },
+    },
+    {
+      title: '采集人号码',
+      key: 'collect',
+      render: (record) => {
+        return <span>{record?.collector?.phoneNumber || ''}</span>;
       },
     },
     {
@@ -377,18 +393,18 @@ export default function index() {
           </Button>
         </Form.Item>
       </Form>
-      {loading && (
-        <Table
-          columns={columns}
-          key={key}
-          dataSource={tableData}
-          rowKey="code"
-          className="mt-6 whitespace-nowrap"
-          scroll={{ x: true }}
-          pagination={pagination}
-          onChange={handleTableChange}
-        />
-      )}
+
+      <Table
+        columns={columns}
+        key={key}
+        dataSource={tableData}
+        rowKey="code"
+        className="mt-6 whitespace-nowrap"
+        scroll={{ x: true }}
+        pagination={pagination}
+        onChange={handleTableChange}
+      />
+
 
       <Modal
         title="修改数据"

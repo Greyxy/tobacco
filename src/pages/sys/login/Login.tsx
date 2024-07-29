@@ -56,8 +56,8 @@ function Login() {
       </div>
 
       <div className="m-auto flex !h-screen w-full max-w-[480px] flex-col justify-center px-[16px] lg:px-[64px]">
+        <LoginForm />
         <LoginStateProvider>
-          <LoginForm />
           {/* <MobileForm />
           <QrCodeFrom />
           <RegisterForm />

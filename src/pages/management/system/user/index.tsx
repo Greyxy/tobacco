@@ -313,7 +313,7 @@ export default function RolePage() {
                 <Radio value={'1'}>正常</Radio>
               </Radio.Group>
             </Form.Item>
-            <Form.Item name="cityName" label="城市名">
+            <Form.Item name="cityName" label="越西县，宁南县，西昌市">
               {/* <Input /> */}
               <Select>
                 {cityList.map((x) => {
