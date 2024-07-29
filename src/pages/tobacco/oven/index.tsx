@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from 'react'
-import { Button, Space, Table, Form, Select, Input, Modal, Row, Col, message, Image } from 'antd'
+import { useState, useEffect } from 'react';
+import { Button, Space, Table, Form, Select, Input, Modal, Row, Col, message, Image } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useThemeToken } from '@/theme/hooks';
 import tobaccoService from '@/api/services/tobaccoService';
 const { Option } = Select;
 interface TableData {
-  id: string,
+  id: string;
   code: string;
   buildYear: string;
   regionCode: string;
@@ -40,11 +40,11 @@ function parseTime(data) {
   const seconds = String(date.getSeconds()).padStart(2, '0');
 
   const formattedDate = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
-  return formattedDate
+  return formattedDate;
 }
 export default function index() {
-  const [tableData, setTableData] = useState<TableData[]>([])
-  const [roomIdList, setRoomIdList] = useState<String[]>([])
+  const [tableData, setTableData] = useState<TableData[]>([]);
+  const [roomIdList, setRoomIdList] = useState<String[]>([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingRecord, setEditingRecord] = useState<TableData>();
   const [messageApi, contextHolder] = message.useMessage();
@@ -56,39 +56,39 @@ export default function index() {
     setIsModalVisible(false);
   };
   const handleFinish = (values: TableData) => {
-    let index = tableData.findIndex(x => x.code == values.code)
+    let index = tableData.findIndex((x) => x.code == values.code);
     if (index != -1) {
-      values.id = tableData[index].id
+      values.id = tableData[index].id;
     }
-    console.log(values, index)
-    tobaccoService.updateRoom(values).then(res => {
+    console.log(values, index);
+    tobaccoService.updateRoom(values).then((res) => {
       messageApi.open({
         type: 'success',
         content: '修改成功',
       });
-      getRoomData()
+      getRoomData();
       setIsModalVisible(false);
-    })
+    });
   };
   useEffect(() => {
-    getRoomData()
-  }, [])
+    getRoomData();
+  }, []);
   const getRoomData = () => {
-    tobaccoService.getRoomByArea().then(res => {
+    tobaccoService.getRoomByArea().then((res) => {
       res.forEach((item: TableData) => {
-        item.modifyTime = parseTime(item.modifyTime)
-        item.createTime = parseTime(item.createTime)
-      })
-      setTableData(res)
-      const list: String[] = res.map((x: TableData) => x.id)
-      setRoomIdList(list)
-    })
-  }
-  const { colorPrimary } = useThemeToken()
+        item.modifyTime = parseTime(item.modifyTime);
+        item.createTime = parseTime(item.createTime);
+      });
+      setTableData(res);
+      const list: String[] = res.map((x: TableData) => x.id);
+      setRoomIdList(list);
+    });
+  };
+  const { colorPrimary } = useThemeToken();
   const handleEdit = (record) => {
     setIsModalVisible(true);
-    setEditingRecord(record)
-  }
+    setEditingRecord(record);
+  };
 
   const columns: ColumnsType<TableData> = [
     {
@@ -97,7 +97,9 @@ export default function index() {
       fixed: 'left',
       render: (_, record) => (
         <Space size="middle">
-          <Button type="link" onClick={() => handleEdit(record)} style={{ color: colorPrimary }}>修改</Button>
+          <Button type="link" onClick={() => handleEdit(record)} style={{ color: colorPrimary }}>
+            修改
+          </Button>
         </Space>
       ),
     },
@@ -110,13 +112,11 @@ export default function index() {
       title: '烤房编码',
       dataIndex: 'code',
       key: 'code',
-
     },
     {
       title: '建设年份',
       dataIndex: 'buildYear',
       key: 'buildYear',
-
     },
     {
       title: '行政区划代码',
@@ -204,19 +204,16 @@ export default function index() {
       key: 'imgs',
       render: (text: string, record) => {
         if (!record.imgs) {
-          return <span>暂无数据</span>
+          return <span>暂无数据</span>;
         } else if (typeof record.imgs == 'string') {
-          return <Image src={record.imgs} alt="img" width={100} />
+          return <Image src={record.imgs} alt="img" width={100} />;
         } else {
           // 数组
-          return <Image.PreviewGroup
-            items={record.imgs}
-          >
-            <Image
-              width={100}
-              src={record.imgs[0]}
-            />
-          </Image.PreviewGroup>
+          return (
+            <Image.PreviewGroup items={record.imgs}>
+              <Image width={100} src={record.imgs[0]} />
+            </Image.PreviewGroup>
+          );
         }
       },
     },
@@ -241,53 +238,44 @@ export default function index() {
       key: 'createTime',
     },
   ];
-  columns.forEach(item => item.align = 'center')
+  columns.forEach((item) => (item.align = 'center'));
   const onFinish = (values: any) => {
-    console.log('form values', values)
+    console.log('form values', values);
     if (values.smokeHouse) {
-
-      tobaccoService.getRoomById(values.smokeHouse).then(res => {
-        setTableData([res])
-      })
+      tobaccoService.getRoomById(values.smokeHouse).then((res) => {
+        setTableData([res]);
+      });
     } else {
-      getRoomData()
+      getRoomData();
     }
-  }
+  };
   return (
     <>
       {contextHolder}
-      <Form
-        name="search_form"
-        layout="inline"
-        onFinish={onFinish}
-      >
-        <Form.Item
-          name="smokeHouse"
-          label="烟房"
-        >
-          <Select
-            placeholder="请选择烟房"
-            style={{ width: 200 }}
-            allowClear={true}
-          >
-            {
-              roomIdList.map((x, index) => {
-                return <Option key={index} value={x}>{x}</Option>
-              })
-            }
+      <Form name="search_form" layout="inline" onFinish={onFinish}>
+        <Form.Item name="smokeHouse" label="烟房">
+          <Select placeholder="请选择烟房" style={{ width: 200 }} allowClear={true}>
+            {roomIdList.map((x, index) => {
+              return (
+                <Option key={index} value={x}>
+                  {x}
+                </Option>
+              );
+            })}
           </Select>
         </Form.Item>
         <Form.Item>
-          <Button type="primary" htmlType="submit" >
+          <Button type="primary" htmlType="submit">
             查询
           </Button>
         </Form.Item>
       </Form>
-      <Table columns={columns}
+      <Table
+        columns={columns}
         // rowSelection={rowSelection}
         dataSource={tableData}
-        rowKey='code'
-        className='whitespace-nowrap mt-6'
+        rowKey="code"
+        className="mt-6 whitespace-nowrap"
         scroll={{ x: true }}
       />
 
@@ -300,10 +288,7 @@ export default function index() {
         width={1000}
         centered={true}
       >
-        <Form
-          initialValues={editingRecord || {}}
-          onFinish={handleFinish}
-        >
+        <Form initialValues={editingRecord || {}} onFinish={handleFinish}>
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item name="code" label="烤房编码">
@@ -447,12 +432,12 @@ export default function index() {
             {/* <Button type="primary" htmlType="cancel" >
               取消
             </Button> */}
-            <Button type="primary" htmlType="submit" >
+            <Button type="primary" htmlType="submit">
               确定
             </Button>
           </Form.Item>
         </Form>
       </Modal>
     </>
-  )
+  );
 }
