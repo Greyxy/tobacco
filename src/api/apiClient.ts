@@ -36,7 +36,7 @@ axiosInstance.interceptors.response.use(
   (res: AxiosResponse<Result>) => {
     // const router = useRouter();
     if (!res.data) throw new Error(t('sys.api.apiRequestFailed'));
-    debugger;
+
     if (typeof res.data != 'object') return res.data;
     const { status, data, msg } = res.data;
     if (status == 30100) {

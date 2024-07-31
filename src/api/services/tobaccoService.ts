@@ -54,6 +54,22 @@ export enum TobaccoApi {
   // city
   getCountry = '/room/getCounty',
   getStation = '/room/getStation',
+
+  // 烟农 采集人
+  getFarmerList = '/person/farmer/list',
+  getCollectorList = '/person/collector/list',
+  getFarmer = '/person/farmer/',
+  getCollector = '/person/collector/',
+  addFarmer = '/person/farmer',
+  addCollector = '/person/collector',
+  updateFarmer = '/person/farmer',
+  updateCollector = '/person/collector',
+  deleteFarmerById = '/person/farmer/',
+  deleteCollectorById = '/person/collector/',
+  getCollectorByQuery = '/person/collector',
+  getFarmerByQuery = '/person/farmer',
+  searchFarmer = '/person/farmer/search',
+  searchCollector = '/person/collector/search'
 }
 const getRoomById = (id: string) => apiClient.get({ url: `${TobaccoApi.getRoomById}${id}` });
 const updateRoom = (data) => apiClient.post({ url: TobaccoApi.updateRoom, data });
@@ -77,9 +93,6 @@ const updateQrCode = (data) => apiClient.post({ url: `${TobaccoApi.updateQrCode}
 const saveRoomCode = (data) => apiClient.post({ url: `${TobaccoApi.saveRoomCode}`, data });
 const downloadImg = (data) => apiClient.post({ url: `${TobaccoApi.downloadImg}`, data });
 const getImgUrl = (url: string) => apiClient.get({ url: `${TobaccoApi.getImgUrl}${url}` });
-// saveQR = '/qrcode/saveQR',
-// deleteQR = '/qrcode/delete',
-// updateQR='/qrcode/update',
 const saveQR = (data) => apiClient.post({ url: `${TobaccoApi.saveQR}`, params: data });
 const deleteQR = (data) => apiClient.post({ url: `${TobaccoApi.deleteQR}`, params: data });
 const updateQR = (data) => apiClient.post({ url: `${TobaccoApi.updateQR}`, data });
@@ -105,6 +118,19 @@ const getRolePermission = (roleId) =>
   apiClient.get({ url: TobaccoApi.getRolePermission.replace('roleId', roleId) });
 const getCountry = () => apiClient.get({ url: `${TobaccoApi.getCountry}` });
 const getStation = (data) => apiClient.get({ url: `${TobaccoApi.getStation}`, params: data });
+
+// 烟农 采集人 
+const getFarmerByQuery = (data) => apiClient.get({ url: TobaccoApi.getFarmerByQuery, params: data })
+const getCollectorByQuery = (data) => apiClient.get({ url: TobaccoApi.getCollectorByQuery, params: data })
+const addFarmer = (data) => apiClient.post({ url: TobaccoApi.addFarmer, data })
+const addCollector = (data) => apiClient.post({ url: TobaccoApi.addCollector, data })
+const updateFarmer = (data) => apiClient.put({ url: TobaccoApi.updateFarmer, data })
+const updateCollector = (data) => apiClient.put({ url: TobaccoApi.updateCollector, data })
+const deleteCollectorById = (id) => apiClient.delete({ url: TobaccoApi.deleteCollectorById + id })
+const deleteFarmerById = (id) => apiClient.delete({ url: TobaccoApi.deleteFarmerById + id })
+const searchFarmer = (data) => apiClient.get({ url: TobaccoApi.searchFarmer, params: data })
+const searchCollector = (data) => apiClient.get({ url: TobaccoApi.searchCollector, params: data })
+
 export default {
   getRoomById,
   updateRoom,
@@ -139,5 +165,15 @@ export default {
   deleteUserById,
   findUser,
   getCountry,
-  getStation
+  getStation,
+  getFarmerByQuery,
+  addFarmer,
+  updateFarmer,
+  deleteFarmerById,
+  getCollectorByQuery,
+  addCollector,
+  deleteCollectorById,
+  updateCollector,
+  searchFarmer,
+  searchCollector
 };

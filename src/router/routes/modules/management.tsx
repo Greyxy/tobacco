@@ -11,7 +11,8 @@ const AccountPage = lazy(() => import('@/pages/management/user/account'));
 
 const OrganizationPage = lazy(() => import('@/pages/management/system/organization'));
 const PermissioPage = lazy(() => import('@/pages/management/system/permission'));
-
+const Farmer = lazy(() => import('@/pages/management/system/farmer'))
+const Collector = lazy(() => import('@/pages/management/system/collector'))
 const Blog = lazy(() => import('@/pages/management/blog'));
 
 const management: AppRouteObject = {
@@ -65,6 +66,16 @@ const management: AppRouteObject = {
           path: 'permission',
           element: <PermissioPage />,
           meta: { label: 'sys.menu.system.permission', key: '/management/system/permission' },
+        },
+        {
+          path: 'farmer',
+          element: <Farmer />,
+          meta: { label: 'sys.menu.system.famer', key: '/management/system/farmer' },
+        },
+        {
+          path: 'collector',
+          element: <Collector />,
+          meta: { label: 'sys.menu.system.collector', key: '/management/system/collector' },
         },
       ],
     },
