@@ -1,15 +1,15 @@
 import tobaccoService from '@/api/services/tobaccoService';
 import AsyncImage from '@/pages/components/asyncImage';
 import { useThemeToken } from '@/theme/hooks';
-import { Button, Col, Form, Modal, Radio, Row, Select, Space, Table, message } from 'antd';
+import { Button, Col, Form, Input, Modal, Radio, Row, Select, Space, Table, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useEffect, useState } from 'react';
 
 const { Option } = Select;
 interface TableData {
-  id: number;
+  id: string;
   bakingDataStatus: number;
-  roomId: number;
+  roomId: string;
   startTime: string; // datetime
   endTime: string; // datetime
   days: number;
@@ -27,13 +27,13 @@ interface TableData {
   latitude: number;
   imgs: string;
   isMainFarmer: number;
-  farmerId: number;
+  farmerId: string;
   isMainCollector: number;
-  collectorId: number;
+  collectorId: string;
   submitTime: string; // datetime
   modifyTime: string; // datetime
   createTime: string; // datetime
-  bakingDataId: number;
+  bakingDataId: string;
   remark: string;
 }
 var queryObject = { status: '0' };
@@ -60,7 +60,7 @@ export default function index() {
   const [key, setKey] = useState();
   const [key1, setKey1] = useState();
   const [historyData, setHistoryData] = useState([]);
-
+  const [showRemark, setShowRemark] = useState(false)
   useEffect(() => {
     getRoomData(queryObject, pagination.current, pagination.pageSize);
   }, []);
@@ -657,9 +657,10 @@ export default function index() {
     });
   };
   const onReviewFinish = (values) => {
+    debugger
     let id = selectedRow.id;
-    if (values.status == 'approved') {
-      tobaccoService.reviewBacking(id + '').then((res) => {
+    if (values.status == '1') {
+      tobaccoService.reviewBacking({ id }).then((res) => {
         getRoomData(values, pagination.current, pagination.pageSize);
         setIsModalVisible(false);
         messageApi.open({
@@ -668,7 +669,7 @@ export default function index() {
         });
       });
     } else {
-      tobaccoService.refuseBacking(id + '').then((res) => {
+      tobaccoService.refuseBacking({ id, remark: values.remark }).then((res) => {
         getRoomData(values, pagination.current, pagination.pageSize);
         setIsModalVisible(false);
         messageApi.open({
@@ -687,6 +688,13 @@ export default function index() {
   const handleTableChange = (pagination: any) => {
     getRoomData(queryObject, pagination.current, pagination.pageSize);
   };
+  const radioChange = (e) => {
+    if (e.target.value == '2') {
+      setShowRemark(true)
+    } else {
+      setShowRemark(false)
+    }
+  }
   return (
     <>
       {contextHolder}
@@ -726,15 +734,21 @@ export default function index() {
         width={1200}
         onCancel={handleCancel}
       >
-        <Form onFinish={onReviewFinish} initialValues={{ status: '1' }}>
-          <Row gutter={16}>
+        <Form onFinish={onReviewFinish} initialValues={{ status: '1' }} layout='inline'>
+          <Row gutter={10}>
             <Col>
               <Form.Item name="status">
-                <Radio.Group>
+                <Radio.Group onChange={radioChange}>
                   <Radio value="1">审核通过</Radio>
                   <Radio value="2">审核不通过</Radio>
                 </Radio.Group>
               </Form.Item>
+
+            </Col>
+            <Col>
+              {showRemark && <Form.Item name='remark' label='备注'>
+                <Input />
+              </Form.Item>}
             </Col>
             <Col>
               <Form.Item>

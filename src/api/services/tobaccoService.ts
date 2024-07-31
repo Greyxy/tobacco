@@ -12,8 +12,8 @@ export enum TobaccoApi {
   // 根据不同地区查询烤房
   getRoomByArea = '/room/getRoom',
   // 审核
-  reviewBacking = '/backing/review?id=',
-  refuseBacking = '/backing/refuse?id=',
+  reviewBacking = '/backing/review',
+  refuseBacking = '/backing/refuse',
   // 条件查询
   backingQuery = '/backing/query',
   backingFind = '/backing/find',
@@ -78,8 +78,8 @@ const getbackingByRoomId = (roomId: string) =>
   apiClient.get({ url: `${TobaccoApi.getbackingByRoomId}${roomId}` });
 const getRoomByArea = (data) => apiClient.post({ url: TobaccoApi.getRoomByArea, data });
 
-const reviewBacking = (id: string) => apiClient.post({ url: `${TobaccoApi.reviewBacking}${id}` });
-const refuseBacking = (id: string) => apiClient.post({ url: `${TobaccoApi.refuseBacking}${id}` });
+const reviewBacking = (params) => apiClient.post({ url: `${TobaccoApi.reviewBacking}`, params });
+const refuseBacking = (params) => apiClient.post({ url: `${TobaccoApi.refuseBacking}`, params });
 const backingQuery = (data: any) => {
   return apiClient.post({ url: TobaccoApi.backingQuery, data });
 };

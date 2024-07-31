@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react';
 const { Option } = Select;
 interface TableData {
   id: string;
-  roomId: number;
+  roomId: string;
   startTime: string; // datetime
   endTime: string; // datetime
   days: number;
@@ -25,9 +25,9 @@ interface TableData {
   latitude: number;
   imgs: string;
   isMainFarmer: number;
-  farmerId: number;
+  farmerId: string;
   isMainCollector: number;
-  collectorId: number;
+  collectorId: string;
   submitTime: string; // datetime
   // modifyTime: string; // datetime
   // createTime: string; // datetime
