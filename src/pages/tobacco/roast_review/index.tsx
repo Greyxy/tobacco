@@ -745,11 +745,11 @@ export default function index() {
               </Form.Item>
 
             </Col>
-            <Col>
+            {/* <Col>
               {showRemark && <Form.Item name='remark' label='备注'>
                 <Input />
               </Form.Item>}
-            </Col>
+            </Col> */}
             <Col>
               <Form.Item>
                 <Button type="primary" htmlType="submit">
