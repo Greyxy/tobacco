@@ -416,9 +416,6 @@ export default function index() {
         centered={true}
       >
         <Form initialValues={editingRecord || {}} onFinish={handleFinish}>
-          <Row gutter={16}></Row>
-          <Row gutter={16}></Row>
-          <Row gutter={16}></Row>
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item name="kind" label="烤房性质">

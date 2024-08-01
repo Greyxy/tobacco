@@ -146,10 +146,25 @@ export default function index() {
       },
     },
     {
+      title: '烟农号码',
+      // dataIndex: 'farmer.farmerName',
+      key: 'farmer',
+      render: (record) => {
+        return <span>{record?.farmer?.phoneNumber || ''}</span>;
+      },
+    },
+    {
       title: '采集人',
-      key: 'collector',
+      key: 'collect',
       render: (record) => {
         return <span>{record?.collector?.name || ''}</span>;
+      },
+    },
+    {
+      title: '采集人号码',
+      key: 'collect',
+      render: (record) => {
+        return <span>{record?.collector?.phoneNumber || ''}</span>;
       },
     },
     { title: '夹烟工具', dataIndex: 'tool', key: 'tool' },
