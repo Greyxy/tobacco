@@ -48,7 +48,7 @@ function parseTime(data) {
 
 export default function index() {
   const [form] = Form.useForm();
-  const [tableData, setTableData] = useState<TableData[]>([]);
+  const [tableData, setTableData] = useState([]);
   const [queryObject, setQueryObject] = useState({
     name: '',
     idNumber: '',
@@ -157,7 +157,7 @@ export default function index() {
     })
   }
 
-  const columns: ColumnsType<TableData> = [
+  const columns: ColumnsType = [
     {
       title: '操作',
       key: 'action',
@@ -189,7 +189,9 @@ export default function index() {
     { title: '手机号', dataIndex: 'phoneNumber', key: 'phoneNumber' },
     { title: '身份证号', dataIndex: 'idNumber', key: 'idNumber' },
     { title: '地址', dataIndex: 'address', key: 'address' },
-    { title: '种植面积', dataIndex: 'plantingArea', key: 'plantingArea' },
+    { title: '种植面积（亩）', dataIndex: 'plantingArea', key: 'plantingArea' },
+    { title: '品种', dataIndex: 'variety', key: 'variety' },
+    { title: '合同交售数量（公斤）', dataIndex: 'contractQuantity', key: 'contractQuantity' },
     { title: '创建时间', dataIndex: 'createTime', key: 'createTime' },
     { title: '修改时间', dataIndex: 'modifyTime', key: 'modifyTime' },
   ];
@@ -258,19 +260,25 @@ export default function index() {
       >
         <Form initialValues={editingRecord} onFinish={handleFinish} form={form} layout="horizontal">
 
-          <Form.Item name="name" label="姓名" rules={[{ required: true }]} labelCol={{ span: 4 }} wrapperCol={{ span: 29 }}>
+          <Form.Item name="name" label="姓名" rules={[{ required: true }]} labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
             <Input />
           </Form.Item>
-          <Form.Item name="idNumber" label="身份证号码" rules={[{ required: true }]} labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+          <Form.Item name="idNumber" label="身份证号码" rules={[{ required: true }]} labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
             <Input />
           </Form.Item>
-          <Form.Item name="phoneNumber" label="手机号码" rules={[{ required: true }]} labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+          <Form.Item name="phoneNumber" label="手机号码" rules={[{ required: true }]} labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
             <Input />
           </Form.Item>
-          <Form.Item name="address" label="地址" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+          <Form.Item name="address" label="地址" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
             <Input />
           </Form.Item>
-          <Form.Item name="plantingArea" label="种植面积" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+          <Form.Item name="plantingArea" label="种植面积（亩）" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="variety" label="品种" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+            <Input />
+          </Form.Item>
+          <Form.Item name="contractQuantity" label="合同交售数量(公斤)" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
             <Input />
           </Form.Item>
 

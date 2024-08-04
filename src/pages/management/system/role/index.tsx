@@ -110,10 +110,9 @@ export default function RolePage() {
   ];
   const getRoleList = () => {
     tobaccoService.getAllRole().then((res) => {
-      console.log(res);
-      res.records.forEach((item) => (item.id += ''));
-      console.log(res.records);
-      setTableData(res.records);
+      let records = res.records || []
+      records.forEach((item) => (item.id += ''));
+      setTableData(records);
     });
   };
   const onCreate = () => {

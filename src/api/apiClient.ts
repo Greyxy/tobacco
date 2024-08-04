@@ -52,6 +52,10 @@ axiosInstance.interceptors.response.use(
       message.error('error: 服务器错误');
     } else if (status == 30000) {
       message.error('error: ' + data);
+    } else if (status == 403) {
+      message.error('没有权限！');
+    } else if (status == 500) {
+      message.error(msg);
     } else {
       // 业务请求成功
       //  && status === ResultEnum.SUCCESS

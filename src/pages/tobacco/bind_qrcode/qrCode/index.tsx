@@ -180,7 +180,8 @@ export default function QrCode() {
         setQrCodeData([res]);
       });
     } else {
-      getQrCodeData(queryObject, pagination.current, pagination.pageSize);
+      getQrCodeData(queryObject, 1, pagination.pageSize);
+      setPagination({ ...pagination, current: 1 })
     }
   };
   const getQrCodeData = (data, page, pageSize) => {
@@ -214,7 +215,7 @@ export default function QrCode() {
       };
       const token = JSON.parse(localStorage.getItem('token') || '{}').accessToken;
 
-      const response = await fetch('https://mgr.sctworks.com/service/img/getCode', {
+      const response = await fetch('https://mgr.sctworks.com:65532/service/img/getCode', {
         method: 'post',
         headers: {
           Token: token,
@@ -500,7 +501,7 @@ export default function QrCode() {
           <Form.Item
             name="status"
             label="状态"
-            // rules={[{ required: true, message: 'Please select a status!' }]}
+          // rules={[{ required: true, message: 'Please select a status!' }]}
           >
             <Radio.Group>
               <Radio value={0}>停用</Radio>

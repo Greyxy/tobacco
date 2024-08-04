@@ -51,18 +51,27 @@ var queryObject = {
 };
 export default function index() {
   const [bindForm] = Form.useForm();
-  const [tableData, setTableData] = useState<TableData[]>([]);
+  const [tableData, setTableData] = useState([]);
   const [roomIdList, setRoomIdList] = useState<String[]>([]);
   const [roomCodeList, setRoomCodeList] = useState([]);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [editingRecord, setEditingRecord] = useState<TableData>();
+  const [editingRecord, setEditingRecord] = useState({});
   const [messageApi, contextHolder] = message.useMessage();
   const [isModalBindVisible, setIsModalBindVisible] = useState(false);
   const [qrCodeData, setQrCodeData] = useState([]);
   const [remarkList, setRemarkList] = useState<string[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [farmerList, setFarmerList] = useState([])
+  const [collectorList, setCollectorList] = useState([])
   const [key, setKey] = useState();
   const [pagination, setPagination] = useState({ current: 1, pageSize: 8, total: 0 });
+  const [cityList, setCityList] = useState([]);
+  const [stationList, setStationList] = useState([]);
+  const [editForm] = Form.useForm()
+  const getCityList = () => {
+    tobaccoService.getCountry().then((res) => {
+      if (res) setCityList(res);
+    });
+  };
   const handleOk = () => {
     setIsModalVisible(false);
   };
@@ -78,7 +87,7 @@ export default function index() {
     setIsModalBindVisible(false);
     bindForm.resetFields();
   };
-  const handleFinish = (values: TableData) => {
+  const handleFinish = (values) => {
     let index = tableData.findIndex((x) => x.code == values.code);
     if (index != -1) {
       values.id = tableData[index].id;
@@ -128,12 +137,15 @@ export default function index() {
   useEffect(() => {
     getRoomData(queryObject, pagination.current, pagination.pageSize);
     getQrCodeData();
+    getFarmerList()
+    getCollectorList()
+    getCityList()
   }, []);
   const getRoomData = (data, current, pageSize) => {
     tobaccoService.getRoomByArea({ ...data, currentPage: current, pageSize }).then((res) => {
       setPagination({ ...pagination, current, pageSize, total: res.total });
       let currentIndex = 0;
-      res = res.records;
+      res = res.records || [];
       res.forEach(async (item: TableData, index) => {
         // item.modifyTime = parseTime(item.modifyTime)
         // item.createTime = parseTime(item.createTime)
@@ -160,12 +172,32 @@ export default function index() {
       setRoomCodeList(res.map((x: TableData) => x.code));
     });
   };
+  // 获取受益人列表和采集人列表
+  const getFarmerList = () => {
+    tobaccoService.getFarmerByQuery({ page: 1, size: 1000 }).then((res) => {
+      setFarmerList(res.records || []);
+    });
+  }
+  const getCollectorList = () => {
+    tobaccoService.getCollectorByQuery({ page: 1, size: 1000 }).then((res) => {
+      setCollectorList(res.records || []);
+    });
+  }
   const { colorPrimary } = useThemeToken();
   const handleEdit = (record) => {
-    setIsModalVisible(true);
+    record.collectorId = record.collectorId + ''
+    record.farmerId = record.farmerId + ''
+    record.id = record.id
     setEditingRecord(record);
+    editForm.resetFields()
   };
-
+  useEffect(() => {
+    if (editingRecord && editingRecord.id) {
+      console.log(editingRecord)
+      editForm.setFieldsValue(editingRecord)
+      setIsModalVisible(true);
+    }
+  }, [editingRecord])
   const columns: ColumnsType<TableData> = [
     {
       title: '操作',
@@ -255,31 +287,31 @@ export default function index() {
       // dataIndex: 'farmer.farmerName',
       key: 'farmer',
       render: (record) => {
-        return <span>{record?.farmer?.name || ''}</span>;
+        return <span>{record?.farmer?.name + "-" + record?.farmer?.phoneNumber || ''}</span>;
       },
     },
-    {
-      title: '烟农号码',
-      // dataIndex: 'farmer.farmerName',
-      key: 'farmer',
-      render: (record) => {
-        return <span>{record?.farmer?.phoneNumber || ''}</span>;
-      },
-    },
+    // {
+    //   title: '烟农手机号',
+    //   // dataIndex: 'farmer.farmerName',
+    //   key: 'farmer',
+    //   render: (record) => {
+    //     return <span>{record?.farmer?.phoneNumber || ''}</span>;
+    //   },
+    // },
     {
       title: '采集人',
       key: 'collect',
       render: (record) => {
-        return <span>{record?.collector?.name || ''}</span>;
+        return <span>{record?.collector?.name + '-' + record?.collector?.phoneNumber || ''}</span>;
       },
     },
-    {
-      title: '采集人号码',
-      key: 'collect',
-      render: (record) => {
-        return <span>{record?.collector?.phoneNumber || ''}</span>;
-      },
-    },
+    // {
+    //   title: '采集人手机号',
+    //   key: 'collect',
+    //   render: (record) => {
+    //     return <span>{record?.collector?.phoneNumber || ''}</span>;
+    //   },
+    // },
     {
       title: '设备厂家',
       dataIndex: 'deviceFactory',
@@ -324,34 +356,12 @@ export default function index() {
         return <AsyncImage src={imgs} />;
       },
     },
-    // {
-    //   title: '修改时间',
-    //   dataIndex: 'modifyTime',
-    //   key: 'modifyTime',
-    // },
-    // {
-    //   title: '创建时间',
-    //   dataIndex: 'createTime',
-    //   key: 'createTime',
-    // },
   ];
   columns.forEach((item) => (item.align = 'center'));
   const onFinish = (values: any) => {
-    getRoomData(values, pagination.current, pagination.pageSize);
+    getRoomData(values, 1, pagination.pageSize);
     queryObject = values;
-  };
-  const handleBindQrCode = (record: any) => {
-    bindForm.resetFields();
-
-    const obj = {
-      roomCode: record.code,
-      roomId: record.id || '',
-      qrCodeId: '',
-      remark: record.remark || '',
-    };
-
-    setIsModalBindVisible(true);
-    setEditingRecord(obj);
+    setPagination({ ...pagination, current: 1 })
   };
   const getQrCodeData = () => {
     tobaccoService.getQrCode().then((res) => {
@@ -365,6 +375,20 @@ export default function index() {
     console.log('Current Page:', current);
     getRoomData(queryObject, current, pageSize);
   };
+  const handleFilter = (input, option) => {
+    return option.children.includes(input)
+  }
+  const changeCountry = (value) => {
+    console.log(value);
+    if (value) {
+
+      tobaccoService.getStation({ county: value }).then((res) => {
+        setStationList(res);
+      });
+    } else {
+      setStationList([])
+    }
+  };
   return (
     <>
       {contextHolder}
@@ -375,18 +399,37 @@ export default function index() {
         <Form.Item name="farmerName" label="烟农姓名" style={{ marginTop: '5px' }}>
           <Input allowClear={true} />
         </Form.Item>
+        <Form.Item name="farmerPhone" label="烟农手机号" style={{ marginTop: '5px' }}>
+          <Input allowClear={true} />
+        </Form.Item>
         <Form.Item name="collectorName" label="采集人姓名" style={{ marginTop: '5px' }}>
           <Input allowClear={true} />
         </Form.Item>
-        <Form.Item name="farmerPhone" label="烟农号码" style={{ marginTop: '5px' }}>
+        <Form.Item name="collectorPhone" label="采集人手机号" style={{ marginTop: '5px' }}>
           <Input allowClear={true} />
         </Form.Item>
-        <Form.Item name="collectorPhone" label="采集人号码" style={{ marginTop: '5px' }}>
-          <Input allowClear={true} />
+        <Form.Item label="县公司" name="county" style={{ marginTop: '5px' }}>
+          <Select style={{ width: 200 }} onChange={changeCountry} allowClear>
+            {cityList.map((x) => (
+              <Option key={x} value={x}>
+                {x}
+              </Option>
+            ))}
+          </Select>
         </Form.Item>
-        <Form.Item name="stationName" label="站点名称" style={{ marginTop: '5px' }}>
-          <Input allowClear={true} />
+        <Form.Item label="烟站名称" name="stationName" style={{ marginTop: '5px' }}>
+          {/* <Input allowClear={true} /> */}
+          <Select style={{ width: 200 }} allowClear>
+            {stationList.map((x) => (
+              <Option key={x} value={x}>
+                {x}
+              </Option>
+            ))}
+          </Select>
         </Form.Item>
+        {/* <Form.Item name="stationName" label="站点名称" style={{ marginTop: '5px' }}>
+          <Input allowClear={true} />
+        </Form.Item> */}
         <Form.Item style={{ marginTop: '5px' }}>
           <Button type="primary" htmlType="submit">
             查询
@@ -415,7 +458,7 @@ export default function index() {
         width={1000}
         centered={true}
       >
-        <Form initialValues={editingRecord || {}} onFinish={handleFinish}>
+        <Form initialValues={editingRecord || {}} onFinish={handleFinish} form={editForm}>
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item name="kind" label="烤房性质">
@@ -476,38 +519,44 @@ export default function index() {
             </Col>
 
             {/* <Col span={12}>
-              <Form.Item name="imgs" label="图片">
-                <Input />
-              </Form.Item>
-            </Col> */}
+                <Form.Item name="imgs" label="图片">
+                  <Input />
+                </Form.Item>
+              </Col> */}
             <Col span={12}>
-              <Form.Item name="farmerId" label="受益人">
-                <Input />
+              <Form.Item name="farmerId" label="烟农">
+                {/* <Input /> */}
+                <Select showSearch={true} allowClear={true} filterOption={handleFilter}>
+                  {farmerList.map(x => <Option value={x.id} key={x.id}>{x.name + '-' + x.phoneNumber}</Option>)}
+                </Select>
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item name="collectorId" label="采集人">
-                <Input />
+                {/* <Input /> */}
+                <Select showSearch={true} allowClear={true} filterOption={handleFilter}>
+                  {collectorList.map(x => <Option value={x.id} key={x.id}>{x.name + '-' + x.phoneNumber}</Option>)}
+                </Select>
               </Form.Item>
             </Col>
           </Row>
           {/* <Row gutter={16}>
-            <Col span={12}>
-              <Form.Item name="modifyTime" label="修改时间">
-                <Input />
-              </Form.Item>
-            </Col>
-            <Col span={12}>
-              <Form.Item name="createTime" label="创建时间">
-                <Input />
-              </Form.Item>
-            </Col>
-          </Row> */}
+              <Col span={12}>
+                <Form.Item name="modifyTime" label="修改时间">
+                  <Input />
+                </Form.Item>
+              </Col>
+              <Col span={12}>
+                <Form.Item name="createTime" label="创建时间">
+                  <Input />
+                </Form.Item>
+              </Col>
+            </Row> */}
 
           <Form.Item style={{ textAlign: 'right' }}>
             {/* <Button type="primary" htmlType="cancel" >
-              取消
-            </Button> */}
+                取消
+              </Button> */}
             <Button type="primary" htmlType="submit">
               确定
             </Button>
@@ -564,3 +613,4 @@ export default function index() {
     </>
   );
 }
+

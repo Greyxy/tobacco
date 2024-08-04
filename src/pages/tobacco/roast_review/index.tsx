@@ -36,7 +36,7 @@ interface TableData {
   bakingDataId: string;
   remark: string;
 }
-var queryObject = { status: '0' };
+var queryObject = {};
 function parseTime(data) {
   const date = new Date(data);
   const year = date.getFullYear();
@@ -51,8 +51,7 @@ function parseTime(data) {
 }
 export default function index() {
   const [tableData, setTableData] = useState<TableData[]>([]);
-  const [status, setStatus] = useState<string>('0');
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [status, setStatus] = useState<string>();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedRow, setSelectedRow] = useState<TableData>();
   const [messageApi, contextHolder] = message.useMessage();
@@ -61,15 +60,19 @@ export default function index() {
   const [key1, setKey1] = useState();
   const [historyData, setHistoryData] = useState([]);
   const [showRemark, setShowRemark] = useState(false)
+  const [cityList, setCityList] = useState([]);
+  const [stationList, setStationList] = useState([]);
+
   useEffect(() => {
     getRoomData(queryObject, pagination.current, pagination.pageSize);
+    getCityList()
   }, []);
   const getRoomData = (data, page, pageSize) => {
     tobaccoService
-      .backgingFind({ status: data.status, currentPage: page, pageSize })
+      .backgingFind({ ...data, currentPage: page, pageSize })
       .then((res) => {
         setPagination({ ...pagination, current: page, pageSize, total: res.total });
-        res = res.records;
+        res = res.records || [];
         let currentIndex = 0;
         res.forEach(async (item: TableData) => {
           item.modifyTime = parseTime(item.modifyTime);
@@ -78,6 +81,7 @@ export default function index() {
           item.startTime = parseTime(item.startTime);
           item.endTime = parseTime(item.endTime);
           if (item.imgs) {
+            console.log(item.imgs)
             let imgs = JSON.parse(item.imgs);
             if (typeof imgs == 'object') {
               const imgUrls = await Promise.all(
@@ -146,7 +150,7 @@ export default function index() {
       },
     },
     {
-      title: '烟农号码',
+      title: '烟农手机号',
       // dataIndex: 'farmer.farmerName',
       key: 'farmer',
       render: (record) => {
@@ -161,7 +165,7 @@ export default function index() {
       },
     },
     {
-      title: '采集人号码',
+      title: '采集人手机号',
       key: 'collect',
       render: (record) => {
         return <span>{record?.collector?.phoneNumber || ''}</span>;
@@ -231,6 +235,23 @@ export default function index() {
       title: '烤房id',
       dataIndex: 'bakingDataId',
       key: 'bakingDataId',
+      render: (text, record, index) => {
+        if (index === 0) {
+          const prevRow = historyData[index + 1];
+          if (prevRow && prevRow.bakingDataId !== text) {
+            return <span style={{ color: 'red' }}>{text}</span>;
+          } else {
+            return <span>{text}</span>;
+          }
+        } else {
+          return <span>{text}</span>;
+        }
+      },
+    },
+    {
+      title: '修改原因',
+      dataIndex: 'remark',
+      key: 'remark',
       render: (text, record, index) => {
         if (index === 0) {
           const prevRow = historyData[index + 1];
@@ -632,7 +653,8 @@ export default function index() {
   const onFinish = (values: any) => {
     setStatus(values.status);
     queryObject = values;
-    getRoomData(values, pagination.current, pagination.pageSize);
+    getRoomData(values, 1, pagination.pageSize);
+    setPagination({ ...pagination, current: 1 })
   };
 
   const { colorPrimary } = useThemeToken();
@@ -672,25 +694,28 @@ export default function index() {
     });
   };
   const onReviewFinish = (values) => {
-    debugger
     let id = selectedRow.id;
     if (values.status == '1') {
       tobaccoService.reviewBacking({ id }).then((res) => {
+        if (res) {
+          messageApi.open({
+            type: 'success',
+            content: '审核成功',
+          });
+        }
         getRoomData(values, pagination.current, pagination.pageSize);
         setIsModalVisible(false);
-        messageApi.open({
-          type: 'success',
-          content: '审核成功',
-        });
       });
     } else {
       tobaccoService.refuseBacking({ id, remark: values.remark }).then((res) => {
         getRoomData(values, pagination.current, pagination.pageSize);
         setIsModalVisible(false);
-        messageApi.open({
-          type: 'success',
-          content: '审核成功',
-        });
+        if (res) {
+          messageApi.open({
+            type: 'success',
+            content: '审核成功',
+          });
+        }
       });
     }
   };
@@ -710,19 +735,67 @@ export default function index() {
       setShowRemark(false)
     }
   }
+  const getCityList = () => {
+    tobaccoService.getCountry().then((res) => {
+      if (res) setCityList(res);
+    });
+  };
+  const changeCountry = (value) => {
+    console.log(value);
+    if (value) {
+
+      tobaccoService.getStation({ county: value }).then((res) => {
+        setStationList(res);
+      });
+    } else {
+      setStationList([])
+    }
+
+  };
   return (
     <>
       {contextHolder}
       <div>
         <Form name="search_form" layout="inline" onFinish={onFinish} initialValues={queryObject}>
-          <Form.Item name="status" label="状态">
-            <Select placeholder="请选择审核状态" style={{ width: 200 }}>
+          <Form.Item name="status" label="状态" style={{ marginTop: '5px' }}>
+            <Select placeholder="请选择审核状态" style={{ width: 200, }} >
               <Option value="0">待审核</Option>
               <Option value="1">审核通过</Option>
               <Option value="2">审核不通过</Option>
             </Select>
           </Form.Item>
-          <Form.Item>
+          <Form.Item label="烟农" name="farmerName" style={{ marginTop: '5px' }}>
+            <Input allowClear={true} />
+          </Form.Item>
+          <Form.Item name="farmerPhone" label="烟农手机号" style={{ marginTop: '5px' }}>
+            <Input allowClear={true} />
+          </Form.Item>
+          <Form.Item label="采集人" name="collectorName" style={{ marginTop: '5px' }}>
+            <Input allowClear={true} />
+          </Form.Item>
+          <Form.Item name="collectorPhone" label="采集人手机号" style={{ marginTop: '5px' }}>
+            <Input allowClear={true} />
+          </Form.Item>
+          <Form.Item label="县公司" name="county" style={{ marginTop: '5px' }}>
+            <Select style={{ width: 200 }} onChange={changeCountry} allowClear>
+              {cityList.map((x) => (
+                <Option key={x} value={x}>
+                  {x}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item label="烟站名称" name="stationName" style={{ marginTop: '5px' }}>
+            {/* <Input allowClear={true} /> */}
+            <Select style={{ width: 200 }} allowClear>
+              {stationList.map((x) => (
+                <Option key={x} value={x}>
+                  {x}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item style={{ marginTop: '5px' }}>
             <Button type="primary" htmlType="submit">
               查询
             </Button>

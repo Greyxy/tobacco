@@ -8,7 +8,7 @@ export enum TobaccoApi {
   // 根据烤房id查询烘烤数据
   getbackingByRoomId = '/backing/id?roomId=',
   // submitbacking = '/backing/submit',
-  // updatebacking = 'backing/update',
+  updatebacking = 'backing/update',
   // 根据不同地区查询烤房
   getRoomByArea = '/room/getRoom',
   // 审核
@@ -77,13 +77,13 @@ const updateRoom = (data) => apiClient.post({ url: TobaccoApi.updateRoom, data }
 const getbackingByRoomId = (roomId: string) =>
   apiClient.get({ url: `${TobaccoApi.getbackingByRoomId}${roomId}` });
 const getRoomByArea = (data) => apiClient.post({ url: TobaccoApi.getRoomByArea, data });
-
+const updatebacking = (data) => apiClient.post({ url: TobaccoApi.updatebacking, data })
 const reviewBacking = (params) => apiClient.post({ url: `${TobaccoApi.reviewBacking}`, params });
 const refuseBacking = (params) => apiClient.post({ url: `${TobaccoApi.refuseBacking}`, params });
 const backingQuery = (data: any) => {
   return apiClient.post({ url: TobaccoApi.backingQuery, data });
 };
-const backgingFind = (data) => apiClient.get({ url: `${TobaccoApi.backingFind}`, params: data });
+const backgingFind = (data) => apiClient.post({ url: `${TobaccoApi.backingFind}`, data });
 // 二维码
 const getQrCode = (params) => apiClient.get({ url: `${TobaccoApi.getQrCode}`, params });
 const deleteQrCodeById = (id: string) =>
@@ -135,6 +135,7 @@ export default {
   getRoomById,
   updateRoom,
   getbackingByRoomId,
+  updatebacking,
   getRoomByArea,
   reviewBacking,
   refuseBacking,

@@ -43,9 +43,9 @@ export default function RolePage() {
   }, [userForm, isModalVisible]);
   const getUserList = () => {
     tobaccoService.getAllUser().then((res) => {
-      if (res?.records) {
-        setTableData(res.records);
-      }
+      let records = res.records || []
+
+      setTableData(records);
     });
   };
   const getRoleList = () => {
@@ -134,7 +134,7 @@ export default function RolePage() {
       ),
     },
     {
-      title: 'Action',
+      title: '操作',
       key: 'operation',
       align: 'center',
       width: 100,
@@ -313,7 +313,7 @@ export default function RolePage() {
                 <Radio value={'1'}>正常</Radio>
               </Radio.Group>
             </Form.Item>
-            <Form.Item name="cityName" label="越西县，宁南县，西昌市">
+            <Form.Item name="cityName" label="位置">
               {/* <Input /> */}
               <Select>
                 {cityList.map((x) => {
