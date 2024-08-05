@@ -69,7 +69,7 @@ dependencies:
     specifier: ^4.2.3
     version: 4.2.3
   dayjs:
-    specifier: ^1.11.10
+    specifier: ^1.11.12
     version: 1.11.12
   file-saver:
     specifier: ^2.0.5
@@ -95,6 +95,9 @@ dependencies:
   numeral:
     specifier: ^2.0.6
     version: 2.0.6
+  pinyin-match:
+    specifier: ^1.2.5
+    version: 1.2.5
   pnpm:
     specifier: ^9.6.0
     version: 9.6.0
@@ -6933,6 +6936,10 @@ packages:
     resolution: {integrity: sha512-uB80kBFb/tfd68bVleG9T5GGsGPjJrLAUpR5PZIrhBnIaRTQRjqdJSsIKkOP6OAIFbj7GOrcudc5pNjZ+geV2g==}
     engines: {node: '>=6'}
     dev: true
+
+  /pinyin-match@1.2.5:
+    resolution: {integrity: sha512-+F3bi5v95enkqSJ0nD1e2fGp8Uj3YCRBzka3DlCQ4tyurfqYmAChLR3aAO/c/Pk+xBgvEx9zI35HoyYATSb0mw==}
+    dev: false
 
   /pirates@4.0.6:
     resolution: {integrity: sha512-saLsH7WeYYPiD25LDuLRRY/i+6HaPYr6G1OUlN39otzkSTxKnubR9RTxS3/Kk50s1g2JTgFwWQDQyplC5/SHZg==}

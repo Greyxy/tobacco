@@ -15,6 +15,7 @@ import {
   Table,
 } from 'antd';
 import moment from 'moment';
+import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 const { Option } = Select;
 
@@ -154,8 +155,8 @@ export default function index() {
 
   const handleEdit = (record) => {
     let obj = JSON.parse(JSON.stringify(record));
-    obj.startTime = moment(obj.startTime, 'YYYY-MM-DD');
-    obj.endTime = moment(obj.endTime, 'YYYY-MM-DD');
+    obj.startTime = dayjs(obj.startTime, 'YYYY-MM-DD');
+    obj.endTime = dayjs(obj.endTime, 'YYYY-MM-DD');
     console.log(obj);
     setEditingRecord(obj);
     editForm.resetFields();
@@ -268,13 +269,15 @@ export default function index() {
     let obj = {
       ...values,
       id: editingRecord.id,
+      startTime: values.startTime ? values.startTime.format('YYYY-MM-DD') : null,
+      endTime: values.endTime ? values.endTime.format('YYYY-MM-DD') : null,
     };
     // obj.yellowWeight = 0;
     obj.sampleWeight = Number(obj.sampleWeight);
     obj.greenWeight = Number(obj.greenWeight);
-    obj.sampleTotalWeight = obj.sampleWeight + obj.greenWeight;
-    obj.totalWeight = (obj.sampleTotalWeight / 10) * obj.samplePoleAmount;
-    obj.yellowRate = (obj.sampleWeight / obj.totalWeight).toFixed(2);
+    // obj.sampleTotalWeight = obj.sampleWeight + obj.greenWeight;
+    // obj.totalWeight = (obj.sampleTotalWeight / 10) * obj.samplePoleAmount;
+    // obj.yellowRate = (obj.sampleWeight / obj.totalWeight).toFixed(2);
     tobaccoService.updatebacking(obj).then((res) => {
       if (res) {
         message.open({
@@ -286,9 +289,27 @@ export default function index() {
       }
     });
   };
-  const onChange = () => {
-    console.log('onChange');
+  const changeDate = () => {
+    // console.log('onChange');
+    let startTime = editForm.getFieldValue('startTime')
+    let endTime = editForm.getFieldValue('endTime')
+    if (startTime && endTime)
+      editForm.setFieldValue('days', (new Date(endTime).getTime() - new Date(startTime).getTime()) / 3600 / 24 / 1000)
   };
+  const calculate = () => {
+    let greenWeight = editForm.getFieldValue('greenWeight')
+    let sampleWeight = editForm.getFieldValue('sampleWeight')
+    let totalPoleAmount = editForm.getFieldValue('totalPoleAmount')
+    if (greenWeight && totalPoleAmount && sampleWeight) {
+
+      let sampleTotalWeight = sampleWeight * 1 + greenWeight * 1;
+      let totalWeight = (sampleTotalWeight / 10) * totalPoleAmount;
+      let yellowRate = (sampleWeight / sampleTotalWeight).toFixed(2);
+      editForm.setFieldValue('sampleTotalWeight', sampleTotalWeight)
+      editForm.setFieldValue('totalWeight', totalWeight)
+      editForm.setFieldValue('yellowRate', yellowRate)
+    }
+  }
   return (
     <div>
       {contextHolder}
@@ -373,17 +394,17 @@ export default function index() {
           <Row gutter={16}>
             <Col span={12}>
               <Form.Item name="startTime" label="开始时间">
-                <DatePicker format={'YYYY-MM-DD'} />
+                <DatePicker format={'YYYY-MM-DD'} onChange={changeDate} />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item name="endTime" label="结束时间">
-                <DatePicker format={'YYYY-MM-DD'} />
+                <DatePicker format={'YYYY-MM-DD'} onChange={changeDate} />
               </Form.Item>
             </Col>
             <Col span={12}>
               <Form.Item name="days" label="烘烤天数">
-                <Input />
+                <Input disabled />
               </Form.Item>
             </Col>
             <Col span={12}>
@@ -418,33 +439,33 @@ export default function index() {
 
             <Col span={12}>
               <Form.Item name="samplePoleAmount" label="抽样杆数">
-                <Input />
+                <Input onBlur={calculate} />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="greenWeight" label="青杂重量">
-                <Input />
+              <Form.Item name="greenWeight" label="青杂重量(kg)">
+                <Input onBlur={calculate} />
               </Form.Item>
             </Col>
 
             <Col span={12}>
-              <Form.Item name="sampleWeight" label="抽样重量">
-                <Input />
+              <Form.Item name="sampleWeight" label="黄烟重量(kg)">
+                <Input onBlur={calculate} />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="totalWeight" label="总重量">
-                <Input />
+              <Form.Item name="totalWeight" label="总重量(kg)">
+                <Input disabled />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="sampleTotalWeight" label="抽样总重量">
-                <Input />
+              <Form.Item name="sampleTotalWeight" label="抽样重量(kg)">
+                <Input disabled />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="yellowRate" label="黄烟率">
-                <Input />
+              <Form.Item name="yellowRate" label="黄烟率(%)">
+                <Input disabled />
               </Form.Item>
             </Col>
 
