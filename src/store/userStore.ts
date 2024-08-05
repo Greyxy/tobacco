@@ -9,7 +9,7 @@ import { getItem, removeItem, setItem } from '@/utils/storage';
 
 import { UserInfo, UserToken } from '#/entity';
 import { StorageEnum } from '#/enum';
-import { DEFAULT_USER } from '@/_mock/assets'
+import { DEFAULT_USER } from '@/_mock/assets';
 import { message as Message, message } from 'antd';
 // import useLocale, { LANGUAGE_MAP } from '@/locales/useLocale';
 
@@ -58,32 +58,31 @@ export const useSignIn = () => {
 
   const signInMutation = useMutation({
     // mutationFn: userService.signin,
-    mutationFn: tobaccoService.login
+    mutationFn: tobaccoService.login,
   });
 
   const signIn = async (data: SignInReq) => {
     try {
       // const res = await signInMutation.mutateAsync(data);
-      tobaccoService.login(data).then(res => {
-        const accessToken = res
+      tobaccoService.login(data).then((res) => {
+        const accessToken = res;
         setUserToken({
-          accessToken
+          accessToken,
           // ,refreshToken:accessToken
-        })
-        setUserInfo({ ...DEFAULT_USER, username: data.userName })
+        });
+        setUserInfo({ ...DEFAULT_USER, username: data.userName });
         navigatge(HOMEPAGE, { replace: true });
-      })
+      });
       // const { user, accessToken, refreshToken } = res;
       // setUserToken({ accessToken, refreshToken });
       // setUserInfo(user);
       // setLocale('zh_CN')
-
     } catch (err) {
       // message.warning({
       //   content: err.message,
       //   // duration: 3,
       // });
-      message.error(err.message)
+      message.error(err.message);
     }
   };
 

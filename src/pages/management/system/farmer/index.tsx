@@ -1,7 +1,19 @@
 import tobaccoService from '@/api/services/tobaccoService';
 import AsyncImage from '@/pages/components/asyncImage';
 import { useThemeToken } from '@/theme/hooks';
-import { Button, Col, Form, Input, message, Modal, Popconfirm, Row, Select, Space, Table } from 'antd';
+import {
+  Button,
+  Col,
+  Form,
+  Input,
+  message,
+  Modal,
+  Popconfirm,
+  Row,
+  Select,
+  Space,
+  Table,
+} from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useEffect, useState } from 'react';
 import { IconButton, Iconify } from '@/components/icon';
@@ -52,9 +64,9 @@ export default function index() {
   const [queryObject, setQueryObject] = useState({
     name: '',
     idNumber: '',
-    phoneNumber: ''
-  })
-  const [title, setTitle] = useState('添加数据')
+    phoneNumber: '',
+  });
+  const [title, setTitle] = useState('添加数据');
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingRecord, setEditingRecord] = useState({});
   const [messageApi, contextHolder] = message.useMessage();
@@ -68,16 +80,17 @@ export default function index() {
   };
   const handleFinish = (values) => {
     if (title == '添加数据') {
-      tobaccoService.addFarmer(values).then(res => {
-        messageApi.open({
-          type: 'success',
-          content: '添加成功',
-        });
-        setIsModalVisible(false);
-      })
+      tobaccoService.addFarmer(values).then((res) => {
+        if (res) {
+          messageApi.open({
+            type: 'success',
+            content: '添加成功',
+          });
+          setIsModalVisible(false);
+        }
+      });
     } else {
-
-      let obj = { ...values, id: editingRecord.id }
+      let obj = { ...values, id: editingRecord.id };
       tobaccoService.updateFarmer(obj).then((res) => {
         messageApi.open({
           type: 'success',
@@ -91,71 +104,70 @@ export default function index() {
   useEffect(() => {
     if (!isModalVisible) {
       if (queryObject.idNumber || queryObject.phoneNumber || queryObject.name) {
-        getFarmerByQuery(queryObject)
+        getFarmerByQuery(queryObject);
       } else {
         getFarmerList({ page: pagination.current, size: pagination.pageSize });
       }
     }
-
   }, [queryObject, pagination, isModalVisible]);
   const getFarmerList = (data) => {
     tobaccoService.getFarmerByQuery(data).then((res) => {
       res.records.forEach((item, index) => {
-        item.modifyTime = parseTime(item.modifyTime)
-        item.createTime = parseTime(item.createTime)
+        item.modifyTime = parseTime(item.modifyTime);
+        item.createTime = parseTime(item.createTime);
       });
       if (res.total != pagination.total) {
         setPagination({
           ...pagination,
           total: res.total,
-        })
+        });
       }
       setTableData(res.records);
     });
   };
   const getFarmerByQuery = (data) => {
-    tobaccoService.searchFarmer(data).then(res => {
-      res = res
+    tobaccoService.searchFarmer(data).then((res) => {
+      res = res;
       res.forEach((item, index) => {
-        item.modifyTime = parseTime(item.modifyTime)
-        item.createTime = parseTime(item.createTime)
+        item.modifyTime = parseTime(item.modifyTime);
+        item.createTime = parseTime(item.createTime);
       });
       setTableData(res);
       if (pagination.total != 0) {
         setPagination({
           current: 1,
           pageSize: pagination.pageSize,
-          total: 0
-        })
+          total: 0,
+        });
       }
-    })
-  }
+    });
+  };
 
   const handleEdit = (record) => {
     // setIsModalVisible(true);
     form.setFieldsValue(record);
     setEditingRecord(record);
-    setTitle('修改数据')
+    setTitle('修改数据');
   };
   useEffect(() => {
     if (JSON.stringify(editingRecord) != '{}') {
-      console.log(editingRecord)
-      setIsModalVisible(true)
+      console.log(editingRecord);
+      setIsModalVisible(true);
     }
-  }, [editingRecord])
+  }, [editingRecord]);
   const handleDelete = (record) => {
-    tobaccoService.deleteFarmerById(record.id).then(res => {
+    tobaccoService.deleteFarmerById(record.id).then((res) => {
       message.open({
         type: 'success',
-        content: '删除成功'
-      })
+        content: '删除成功',
+      });
       if (queryObject.idNumber || queryObject.phoneNumber || queryObject.name) {
-        getFarmerByQuery(queryObject)
+        getFarmerByQuery(queryObject);
       } else {
         getFarmerList({ page: pagination.current, size: pagination.pageSize });
       }
-    })
-  }
+    });
+  };
 
   const columns: ColumnsType = [
     {
@@ -181,7 +193,6 @@ export default function index() {
               <Iconify icon="mingcute:delete-2-fill" size={18} className="text-error" />
             </IconButton>
           </Popconfirm>
-
         </Space>
       ),
     },
@@ -197,11 +208,11 @@ export default function index() {
   ];
   columns.forEach((item) => (item.align = 'center'));
   const onFinish = (values: any) => {
-    setQueryObject({ ...queryObject, ...values })
+    setQueryObject({ ...queryObject, ...values });
   };
   const handleTableChange = (paginations: any) => {
     // 获取当前页数
-    setPagination({ ...pagination, current: paginations.current, pageSize: paginations.pageSize })
+    setPagination({ ...pagination, current: paginations.current, pageSize: paginations.pageSize });
   };
   const handleAdd = () => {
     setEditingRecord({
@@ -209,17 +220,17 @@ export default function index() {
       idNumber: '',
       phoneNumber: '',
       address: '',
-      plantingArea: ''
-    })
-    form.resetFields()
-    setTitle('添加数据')
-  }
+      plantingArea: '',
+    });
+    form.resetFields();
+    setTitle('添加数据');
+  };
   return (
     <>
       {contextHolder}
-      <div className='flex justify-between items-center'>
+      <div className="flex items-center justify-between">
         <Form name="search_form" layout="inline" onFinish={onFinish} initialValues={queryObject}>
-          <Form.Item name="name" label="姓名" style={{ marginTop: '5px' }} >
+          <Form.Item name="name" label="姓名" style={{ marginTop: '5px' }}>
             <Input allowClear={true} />
           </Form.Item>
           <Form.Item name="phoneNumber" label="手机号码" style={{ marginTop: '5px' }}>
@@ -234,12 +245,13 @@ export default function index() {
             </Button>
           </Form.Item>
         </Form>
-        <Button type='primary' onClick={handleAdd}>新增</Button>
+        <Button type="primary" onClick={handleAdd}>
+          新增
+        </Button>
       </div>
 
       <Table
         columns={columns}
-
         dataSource={tableData}
         rowKey="code"
         className="mt-6 whitespace-nowrap"
@@ -247,7 +259,6 @@ export default function index() {
         pagination={pagination}
         onChange={handleTableChange}
       />
-
 
       <Modal
         title={title}
@@ -259,26 +270,53 @@ export default function index() {
         centered={true}
       >
         <Form initialValues={editingRecord} onFinish={handleFinish} form={form} layout="horizontal">
-
-          <Form.Item name="name" label="姓名" rules={[{ required: true }]} labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+          <Form.Item
+            name="name"
+            label="姓名"
+            rules={[{ required: true }]}
+            labelCol={{ span: 6 }}
+            wrapperCol={{ span: 18 }}
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="idNumber" label="身份证号码" rules={[{ required: true }]} labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+          <Form.Item
+            name="idNumber"
+            label="身份证号码"
+            rules={[{ required: true }]}
+            labelCol={{ span: 6 }}
+            wrapperCol={{ span: 18 }}
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="phoneNumber" label="手机号码" rules={[{ required: true }]} labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+          <Form.Item
+            name="phoneNumber"
+            label="手机号码"
+            rules={[{ required: true }]}
+            labelCol={{ span: 6 }}
+            wrapperCol={{ span: 18 }}
+          >
             <Input />
           </Form.Item>
           <Form.Item name="address" label="地址" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
             <Input />
           </Form.Item>
-          <Form.Item name="plantingArea" label="种植面积（亩）" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+          <Form.Item
+            name="plantingArea"
+            label="种植面积（亩）"
+            labelCol={{ span: 6 }}
+            wrapperCol={{ span: 18 }}
+          >
             <Input />
           </Form.Item>
           <Form.Item name="variety" label="品种" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
             <Input />
           </Form.Item>
-          <Form.Item name="contractQuantity" label="合同交售数量(公斤)" labelCol={{ span: 6 }} wrapperCol={{ span: 18 }}>
+          <Form.Item
+            name="contractQuantity"
+            label="合同交售数量(公斤)"
+            labelCol={{ span: 6 }}
+            wrapperCol={{ span: 18 }}
+          >
             <Input />
           </Form.Item>
 

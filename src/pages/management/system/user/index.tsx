@@ -43,7 +43,7 @@ export default function RolePage() {
   }, [userForm, isModalVisible]);
   const getUserList = () => {
     tobaccoService.getAllUser().then((res) => {
-      let records = res.records || []
+      let records = res.records || [];
 
       setTableData(records);
     });
@@ -55,6 +55,7 @@ export default function RolePage() {
   };
   const getCityList = () => {
     tobaccoService.getCountry().then((res) => {
+      res.unshift('州公司');
       if (res) setCityList(res);
     });
   };

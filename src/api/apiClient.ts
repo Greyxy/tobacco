@@ -51,7 +51,7 @@ axiosInstance.interceptors.response.use(
       // 服务器错误
       message.error('error: 服务器错误');
     } else if (status == 30000) {
-      message.error('error: ' + data);
+      message.error('error: ' + msg || data);
     } else if (status == 403) {
       message.error('没有权限！');
     } else if (status == 500) {
@@ -68,7 +68,7 @@ axiosInstance.interceptors.response.use(
     }
 
     // 业务请求错误
-    throw new Error(msg || t('sys.api.apiRequestFailed'));
+    // throw new Error(msg || t('sys.api.apiRequestFailed'));
   },
   (error: AxiosError<Result>) => {
     const { response, message } = error || {};

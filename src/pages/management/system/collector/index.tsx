@@ -1,9 +1,18 @@
 import tobaccoService from '@/api/services/tobaccoService';
 
-import { Button, Col, Form, Input, message, Modal, Popconfirm, Row, Select, Space, Table } from 'antd';
+import { IconButton, Iconify } from '@/components/icon';
+import {
+  Button,
+  Form,
+  Input,
+  message,
+  Modal,
+  Popconfirm,
+  Space,
+  Table
+} from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useEffect, useState } from 'react';
-import { IconButton, Iconify } from '@/components/icon';
 
 interface TableData {
   id: string;
@@ -50,9 +59,9 @@ export default function index() {
   const [queryObject, setQueryObject] = useState({
     name: '',
     idNumber: '',
-    phoneNumber: ''
-  })
-  const [title, setTitle] = useState('添加数据')
+    phoneNumber: '',
+  });
+  const [title, setTitle] = useState('添加数据');
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingRecord, setEditingRecord] = useState({});
   const [messageApi, contextHolder] = message.useMessage();
@@ -65,22 +74,27 @@ export default function index() {
   };
   const handleFinish = (values) => {
     if (title == '添加数据') {
-      tobaccoService.addCollector(values).then(res => {
-        messageApi.open({
-          type: 'success',
-          content: '添加成功',
-        });
-        setIsModalVisible(false);
-      })
+      tobaccoService.addCollector(values).then((res) => {
+        if (res) {
+          if (res) {
+            messageApi.open({
+              type: 'success',
+              content: '添加成功',
+            });
+            setIsModalVisible(false);
+          }
+        }
+      });
     } else {
-
-      let obj = { ...values, id: editingRecord.id }
+      let obj = { ...values, id: editingRecord.id };
       tobaccoService.updateCollector(obj).then((res) => {
-        messageApi.open({
-          type: 'success',
-          content: '修改成功',
-        });
-        setIsModalVisible(false);
+        if (res) {
+          messageApi.open({
+            type: 'success',
+            content: '修改成功',
+          });
+          setIsModalVisible(false);
+        }
       });
     }
   };
@@ -88,71 +102,75 @@ export default function index() {
   useEffect(() => {
     if (!isModalVisible) {
       if (queryObject.idNumber || queryObject.phoneNumber || queryObject.name) {
-        getCollectorByQuery(queryObject)
+        getCollectorByQuery(queryObject);
       } else {
         getCollectorList({ page: pagination.current, size: pagination.pageSize });
       }
     }
-
   }, [queryObject, pagination, isModalVisible]);
   const getCollectorList = (data) => {
     tobaccoService.getCollectorByQuery(data).then((res) => {
-      res.records.forEach((item, index) => {
-        item.modifyTime = parseTime(item.modifyTime)
-        item.createTime = parseTime(item.createTime)
-      });
-      if (res.total != pagination.total) {
-        setPagination({
-          ...pagination,
-          total: res.total,
-        })
+      if (res) {
+        res.records.forEach((item, index) => {
+          item.modifyTime = parseTime(item.modifyTime);
+          item.createTime = parseTime(item.createTime);
+        });
+        if (res.total != pagination.total) {
+          setPagination({
+            ...pagination,
+            total: res.total,
+          });
+        }
+        setTableData(res.records);
       }
-      setTableData(res.records);
     });
   };
   const getCollectorByQuery = (data) => {
-    tobaccoService.searchCollector(data).then(res => {
-      res = res
-      res.forEach((item, index) => {
-        item.modifyTime = parseTime(item.modifyTime)
-        item.createTime = parseTime(item.createTime)
-      });
-      setTableData(res);
-      if (pagination.total != 0) {
-        setPagination({
-          current: 1,
-          pageSize: pagination.pageSize,
-          total: 0
-        })
+    tobaccoService.searchCollector(data).then((res) => {
+      if (res) {
+        res.forEach((item, index) => {
+          item.modifyTime = parseTime(item.modifyTime);
+          item.createTime = parseTime(item.createTime);
+        });
+        setTableData(res);
+        if (pagination.total != 0) {
+          setPagination({
+            current: 1,
+            pageSize: pagination.pageSize,
+            total: 0,
+          });
+        }
       }
-    })
-  }
+    });
+  };
 
   const handleEdit = (record) => {
     // setIsModalVisible(true);
     form.setFieldsValue(record);
     setEditingRecord(record);
-    setTitle('修改数据')
+    setTitle('修改数据');
   };
   useEffect(() => {
     if (JSON.stringify(editingRecord) != '{}') {
-      console.log(editingRecord)
-      setIsModalVisible(true)
+      console.log(editingRecord);
+      setIsModalVisible(true);
     }
-  }, [editingRecord])
+  }, [editingRecord]);
   const handleDelete = (record) => {
-    tobaccoService.deleteCollectorById(record.id).then(res => {
-      message.open({
-        type: 'success',
-        content: '删除成功'
-      })
-      if (queryObject.idNumber || queryObject.phoneNumber || queryObject.name) {
-        getCollectorByQuery(queryObject)
-      } else {
-        getCollectorList({ page: pagination.current, size: pagination.pageSize });
+    tobaccoService.deleteCollectorById(record.id).then((res) => {
+      if (res) {
+        message.open({
+          type: 'success',
+          content: '删除成功',
+        });
+        if (queryObject.idNumber || queryObject.phoneNumber || queryObject.name) {
+          getCollectorByQuery(queryObject);
+        } else {
+          getCollectorList({ page: pagination.current, size: pagination.pageSize });
+        }
       }
-    })
-  }
+    });
+  };
 
   const columns: ColumnsType<TableData> = [
     {
@@ -178,7 +196,6 @@ export default function index() {
               <Iconify icon="mingcute:delete-2-fill" size={18} className="text-error" />
             </IconButton>
           </Popconfirm>
-
         </Space>
       ),
     },
@@ -192,11 +209,11 @@ export default function index() {
   ];
   columns.forEach((item) => (item.align = 'center'));
   const onFinish = (values: any) => {
-    setQueryObject({ ...queryObject, ...values })
+    setQueryObject({ ...queryObject, ...values });
   };
   const handleTableChange = (paginations: any) => {
     // 获取当前页数
-    setPagination({ ...pagination, current: paginations.current, pageSize: paginations.pageSize })
+    setPagination({ ...pagination, current: paginations.current, pageSize: paginations.pageSize });
   };
   const handleAdd = () => {
     setEditingRecord({
@@ -204,17 +221,16 @@ export default function index() {
       idNumber: '',
       phoneNumber: '',
       address: '',
-
-    })
-    form.resetFields()
-    setTitle('添加数据')
-  }
+    });
+    form.resetFields();
+    setTitle('添加数据');
+  };
   return (
     <>
       {contextHolder}
-      <div className='flex justify-between items-center'>
+      <div className="flex items-center justify-between">
         <Form name="search_form" layout="inline" onFinish={onFinish} initialValues={queryObject}>
-          <Form.Item name="name" label="姓名" style={{ marginTop: '5px' }} >
+          <Form.Item name="name" label="姓名" style={{ marginTop: '5px' }}>
             <Input allowClear={true} />
           </Form.Item>
           <Form.Item name="phoneNumber" label="手机号码" style={{ marginTop: '5px' }}>
@@ -229,12 +245,13 @@ export default function index() {
             </Button>
           </Form.Item>
         </Form>
-        <Button type='primary' onClick={handleAdd}>新增</Button>
+        <Button type="primary" onClick={handleAdd}>
+          新增
+        </Button>
       </div>
 
       <Table
         columns={columns}
-
         dataSource={tableData}
         rowKey="code"
         className="mt-6 whitespace-nowrap"
@@ -242,7 +259,6 @@ export default function index() {
         pagination={pagination}
         onChange={handleTableChange}
       />
-
 
       <Modal
         title={title}
@@ -254,20 +270,36 @@ export default function index() {
         centered={true}
       >
         <Form initialValues={editingRecord} onFinish={handleFinish} form={form} layout="horizontal">
-
-          <Form.Item name="name" label="姓名" rules={[{ required: true }]} labelCol={{ span: 4 }} wrapperCol={{ span: 29 }}>
+          <Form.Item
+            name="name"
+            label="姓名"
+            rules={[{ required: true }]}
+            labelCol={{ span: 4 }}
+            wrapperCol={{ span: 29 }}
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="idNumber" label="身份证号码" rules={[{ required: true }]} labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+          <Form.Item
+            name="idNumber"
+            label="身份证号码"
+            rules={[{ required: true }]}
+            labelCol={{ span: 4 }}
+            wrapperCol={{ span: 20 }}
+          >
             <Input />
           </Form.Item>
-          <Form.Item name="phoneNumber" label="手机号码" rules={[{ required: true }]} labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
+          <Form.Item
+            name="phoneNumber"
+            label="手机号码"
+            rules={[{ required: true }]}
+            labelCol={{ span: 4 }}
+            wrapperCol={{ span: 20 }}
+          >
             <Input />
           </Form.Item>
           <Form.Item name="address" label="地址" labelCol={{ span: 4 }} wrapperCol={{ span: 20 }}>
             <Input />
           </Form.Item>
-
 
           <Form.Item style={{ textAlign: 'right' }}>
             <Button type="primary" htmlType="submit">

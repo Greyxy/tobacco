@@ -1,10 +1,21 @@
 import tobaccoService from '@/api/services/tobaccoService';
 import AsyncImage from '@/pages/components/asyncImage';
-import { Button, Col, DatePicker, Form, Input, message, Modal, Row, Select, Space, Table } from 'antd';
-import type { ColumnsType } from 'antd/es/table';
-import { useEffect, useState } from 'react';
 import { useThemeToken } from '@/theme/hooks';
-import PinYinMatch from 'pinyin-match'
+import {
+  Button,
+  Col,
+  DatePicker,
+  Form,
+  Input,
+  message,
+  Modal,
+  Row,
+  Select,
+  Space,
+  Table,
+} from 'antd';
+import moment from 'moment';
+import { useEffect, useState } from 'react';
 const { Option } = Select;
 
 function parseTime(data) {
@@ -26,8 +37,8 @@ var queryObject = {
   farmerName: '',
   collectorName: '',
 };
-var originFarmerList = []
-var originCollectorList = []
+var originFarmerList = [];
+var originCollectorList = [];
 export default function index() {
   const { colorPrimary } = useThemeToken();
   const columns = [
@@ -56,7 +67,6 @@ export default function index() {
       render: (record) => {
         return <span>{record?.farmer?.name || ''}</span>;
       },
-
     },
     {
       title: '烟农手机号',
@@ -143,10 +153,13 @@ export default function index() {
   const [editForm] = Form.useForm();
 
   const handleEdit = (record) => {
-
-    setEditingRecord(record)
-    editForm.resetFields()
-  }
+    let obj = JSON.parse(JSON.stringify(record));
+    obj.startTime = moment(obj.startTime, 'YYYY-MM-DD');
+    obj.endTime = moment(obj.endTime, 'YYYY-MM-DD');
+    console.log(obj);
+    setEditingRecord(obj);
+    editForm.resetFields();
+  };
   const onFinish = (values: any) => {
     // console.log('Form values:', values, queryObject);
     const formattedValues = {
@@ -157,37 +170,37 @@ export default function index() {
     };
     queryObject = formattedValues;
     getRoomData(formattedValues, 1, pagination.pageSize);
-    setPagination({ ...pagination, current: 1 })
+    setPagination({ ...pagination, current: 1 });
   };
   const [tableData, setTableData] = useState([]);
   const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 });
   const [key, setKey] = useState();
   const [cityList, setCityList] = useState([]);
   const [stationList, setStationList] = useState([]);
-  const [editingRecord, setEditingRecord] = useState({})
-  const [isModalVisible, setIsModalVisible] = useState(false)
-  const [farmerList, setFarmerList] = useState([])
-  const [collectorList, setCollectorList] = useState([])
+  const [editingRecord, setEditingRecord] = useState({});
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [farmerList, setFarmerList] = useState([]);
+  const [collectorList, setCollectorList] = useState([]);
 
   const [messageApi, contextHolder] = message.useMessage();
-  const [form] = Form.useForm()
+  const [form] = Form.useForm();
   useEffect(() => {
     getRoomData(queryObject, pagination.current, pagination.pageSize);
     getCityList();
-    getFarmerList()
-    getCollectorList()
+    getFarmerList();
+    getCollectorList();
   }, []);
   useEffect(() => {
-    editForm.resetFields()
+    editForm.resetFields();
     if (editingRecord.roomId) {
-      setIsModalVisible(true)
-      editForm.setFieldsValue(editingRecord)
+      setIsModalVisible(true);
+      editForm.setFieldsValue(editingRecord);
     }
-  }, [editingRecord])
+  }, [editingRecord]);
   const getRoomData = (data: any, page: number, pageSize: number) => {
     tobaccoService.backingQuery({ ...data, currentPage: page, pageSize }).then((res) => {
       setPagination({ ...pagination, current: page, pageSize, total: res.total });
-      res = res.records || []
+      res = res.records || [];
       let currentIndex = 0;
       res.forEach(async (item, index) => {
         item.submitTime = parseTime(item.submitTime);
@@ -218,15 +231,15 @@ export default function index() {
   const getFarmerList = () => {
     tobaccoService.getFarmerByQuery({ page: 1, size: 1000 }).then((res) => {
       setFarmerList(res.records || []);
-      originFarmerList = res.records || []
+      originFarmerList = res.records || [];
     });
-  }
+  };
   const getCollectorList = () => {
     tobaccoService.getCollectorByQuery({ page: 1, size: 1000 }).then((res) => {
       setCollectorList(res.records || []);
-      originCollectorList = res.records || []
+      originCollectorList = res.records || [];
     });
-  }
+  };
   const handleTableChange = (pagination: any) => {
     getRoomData(queryObject, pagination.current, pagination.pageSize);
   };
@@ -238,12 +251,11 @@ export default function index() {
   const changeCountry = (value) => {
     console.log(value);
     if (value) {
-
       tobaccoService.getStation({ county: value }).then((res) => {
         setStationList(res);
       });
     } else {
-      setStationList([])
+      setStationList([]);
     }
   };
   const handleOk = () => {
@@ -255,25 +267,28 @@ export default function index() {
   const handleFinish = (values) => {
     let obj = {
       ...values,
-      id: editingRecord.id
-    }
+      id: editingRecord.id,
+    };
     // obj.yellowWeight = 0;
-    obj.sampleWeight = Number(obj.sampleWeight)
-    obj.greenWeight = Number(obj.greenWeight)
+    obj.sampleWeight = Number(obj.sampleWeight);
+    obj.greenWeight = Number(obj.greenWeight);
     obj.sampleTotalWeight = obj.sampleWeight + obj.greenWeight;
-    obj.totalWeight = obj.sampleTotalWeight / 10 * obj.samplePoleAmount;
-    obj.yellowRate = (obj.sampleWeight / obj.totalWeight).toFixed(2)
-    tobaccoService.updatebacking(obj).then(res => {
-      message.open({
-        type: 'success',
-        content: '修改烘烤数据成功'
-      })
-      getRoomData(queryObject, pagination.current, pagination.pageSize)
-      setIsModalVisible(false)
-    })
-
-  }
-
+    obj.totalWeight = (obj.sampleTotalWeight / 10) * obj.samplePoleAmount;
+    obj.yellowRate = (obj.sampleWeight / obj.totalWeight).toFixed(2);
+    tobaccoService.updatebacking(obj).then((res) => {
+      if (res) {
+        message.open({
+          type: 'success',
+          content: '修改烘烤数据成功',
+        });
+        getRoomData(queryObject, pagination.current, pagination.pageSize);
+        setIsModalVisible(false);
+      }
+    });
+  };
+  const onChange = () => {
+    console.log('onChange');
+  };
   return (
     <div>
       {contextHolder}
@@ -309,7 +324,7 @@ export default function index() {
           <Input allowClear={true} />
         </Form.Item>
         <Form.Item label="县公司" name="county" style={{ marginTop: '5px' }}>
-          <Select style={{ width: 200 }} onChange={changeCountry} allowClear >
+          <Select style={{ width: 200 }} onChange={changeCountry} allowClear>
             {cityList.map((x) => (
               <Option key={x} value={x}>
                 {x}
@@ -357,72 +372,81 @@ export default function index() {
         <Form initialValues={editingRecord || {}} onFinish={handleFinish} form={editForm}>
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="days" label="烘烤天数" >
+              <Form.Item name="startTime" label="开始时间">
+                <DatePicker format={'YYYY-MM-DD'} />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item name="endTime" label="结束时间">
+                <DatePicker format={'YYYY-MM-DD'} />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item name="days" label="烘烤天数">
                 <Input />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="sequence" label="炕次" >
+              <Form.Item name="sequence" label="炕次">
                 <Input />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="part" label="部位" >
+              <Form.Item name="part" label="部位">
                 {/* <Input /> */}
                 <Select>
-                  <Option value='下二棚'>下二棚</Option>
-                  <Option value='上二棚'>上二棚</Option>
-                  <Option value='腰叶'>腰叶</Option>
-                  <Option value='顶叶'>顶叶</Option>
+                  <Option value="下二棚">下二棚</Option>
+                  <Option value="上二棚">上二棚</Option>
+                  <Option value="腰叶">腰叶</Option>
+                  <Option value="顶叶">顶叶</Option>
                 </Select>
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="tool" label="夹烟工具" >
+              <Form.Item name="tool" label="夹烟工具">
                 <Select>
-                  <Option value='烟夹'>烟夹</Option>
-                  <Option value='烟杆'>烟杆</Option>
+                  <Option value="烟夹">烟夹</Option>
+                  <Option value="烟杆">烟杆</Option>
                 </Select>
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="totalPoleAmount" label="总竿数" >
+              <Form.Item name="totalPoleAmount" label="总竿数">
                 <Input />
               </Form.Item>
             </Col>
 
             <Col span={12}>
-              <Form.Item name="samplePoleAmount" label="抽样杆数" >
+              <Form.Item name="samplePoleAmount" label="抽样杆数">
                 <Input />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="greenWeight" label="青杂重量" >
+              <Form.Item name="greenWeight" label="青杂重量">
                 <Input />
               </Form.Item>
             </Col>
 
-            {/* <Col span={12}>
-              <Form.Item name="totalWeight" label="总重量" >
-                <Input />
-              </Form.Item>
-            </Col> */}
             <Col span={12}>
-              <Form.Item name="sampleWeight" label="抽样重量" >
+              <Form.Item name="sampleWeight" label="抽样重量">
                 <Input />
               </Form.Item>
             </Col>
-            {/* <Col span={12}>
-              <Form.Item name="sampleTotalWeight" label="抽样总重量" >
+            <Col span={12}>
+              <Form.Item name="totalWeight" label="总重量">
                 <Input />
               </Form.Item>
-            </Col> */}
-
-            {/* <Col span={12}>
-              <Form.Item name="yellowRate" label="黄烟率" >
+            </Col>
+            <Col span={12}>
+              <Form.Item name="sampleTotalWeight" label="抽样总重量">
                 <Input />
               </Form.Item>
-            </Col> */}
+            </Col>
+            <Col span={12}>
+              <Form.Item name="yellowRate" label="黄烟率">
+                <Input />
+              </Form.Item>
+            </Col>
 
             {/* <Col span={12}>
               <Form.Item name="imgs" label="Images" >
@@ -467,7 +491,6 @@ export default function index() {
               </Form.Item>
             </Col> */}
 
-
             {/* <Col span={12}>
               <Form.Item name="reviewId" label="Review ID" >
                 <Input />
@@ -478,9 +501,7 @@ export default function index() {
                 <Input />
               </Form.Item>
             </Col> */}
-
           </Row>
-
 
           <Form.Item style={{ textAlign: 'right' }}>
             {/* <Button type="primary" htmlType="cancel" >
@@ -492,6 +513,6 @@ export default function index() {
           </Form.Item>
         </Form>
       </Modal>
-    </div >
+    </div>
   );
 }

@@ -60,13 +60,13 @@ export default function index() {
   const [isModalBindVisible, setIsModalBindVisible] = useState(false);
   const [qrCodeData, setQrCodeData] = useState([]);
   const [remarkList, setRemarkList] = useState<string[]>([]);
-  const [farmerList, setFarmerList] = useState([])
-  const [collectorList, setCollectorList] = useState([])
+  const [farmerList, setFarmerList] = useState([]);
+  const [collectorList, setCollectorList] = useState([]);
   const [key, setKey] = useState();
   const [pagination, setPagination] = useState({ current: 1, pageSize: 8, total: 0 });
   const [cityList, setCityList] = useState([]);
   const [stationList, setStationList] = useState([]);
-  const [editForm] = Form.useForm()
+  const [editForm] = Form.useForm();
   const getCityList = () => {
     tobaccoService.getCountry().then((res) => {
       if (res) setCityList(res);
@@ -93,14 +93,16 @@ export default function index() {
       values.id = tableData[index].id;
     }
     console.log(values, index);
-    let obj = { ...values, id: editingRecord.id }
+    let obj = { ...values, id: editingRecord.id };
     tobaccoService.updateRoom(obj).then((res) => {
-      messageApi.open({
-        type: 'success',
-        content: '修改成功',
-      });
-      getRoomData(queryObject, pagination.current, pagination.pageSize);
-      setIsModalVisible(false);
+      if (res) {
+        messageApi.open({
+          type: 'success',
+          content: '修改成功',
+        });
+        getRoomData(queryObject, pagination.current, pagination.pageSize);
+        setIsModalVisible(false);
+      }
     });
   };
   const handleBindFinish = (values: any) => {
@@ -137,9 +139,9 @@ export default function index() {
   useEffect(() => {
     getRoomData(queryObject, pagination.current, pagination.pageSize);
     getQrCodeData();
-    getFarmerList()
-    getCollectorList()
-    getCityList()
+    getFarmerList();
+    getCollectorList();
+    getCityList();
   }, []);
   const getRoomData = (data, current, pageSize) => {
     tobaccoService.getRoomByArea({ ...data, currentPage: current, pageSize }).then((res) => {
@@ -177,27 +179,27 @@ export default function index() {
     tobaccoService.getFarmerByQuery({ page: 1, size: 1000 }).then((res) => {
       setFarmerList(res.records || []);
     });
-  }
+  };
   const getCollectorList = () => {
     tobaccoService.getCollectorByQuery({ page: 1, size: 1000 }).then((res) => {
       setCollectorList(res.records || []);
     });
-  }
+  };
   const { colorPrimary } = useThemeToken();
   const handleEdit = (record) => {
-    record.collectorId = record.collectorId + ''
-    record.farmerId = record.farmerId + ''
-    record.id = record.id
+    record.collectorId = record.collectorId + '';
+    record.farmerId = record.farmerId + '';
+    record.id = record.id;
     setEditingRecord(record);
-    editForm.resetFields()
+    editForm.resetFields();
   };
   useEffect(() => {
     if (editingRecord && editingRecord.id) {
-      console.log(editingRecord)
-      editForm.setFieldsValue(editingRecord)
+      console.log(editingRecord);
+      editForm.setFieldsValue(editingRecord);
       setIsModalVisible(true);
     }
-  }, [editingRecord])
+  }, [editingRecord]);
   const columns: ColumnsType<TableData> = [
     {
       title: '操作',
@@ -245,6 +247,11 @@ export default function index() {
       key: 'mainInvestor',
     },
     {
+      title: '县公司',
+      dataIndex: 'cityName',
+      key: 'cityName',
+    },
+    {
       title: '烟站名称',
       dataIndex: 'stationName',
       key: 'stationName',
@@ -287,7 +294,7 @@ export default function index() {
       // dataIndex: 'farmer.farmerName',
       key: 'farmer',
       render: (record) => {
-        return <span>{record?.farmer?.name + "-" + record?.farmer?.phoneNumber || ''}</span>;
+        return <span>{record?.farmer?.name + '-' + record?.farmer?.phoneNumber || ''}</span>;
       },
     },
     // {
@@ -361,7 +368,7 @@ export default function index() {
   const onFinish = (values: any) => {
     getRoomData(values, 1, pagination.pageSize);
     queryObject = values;
-    setPagination({ ...pagination, current: 1 })
+    setPagination({ ...pagination, current: 1 });
   };
   const getQrCodeData = () => {
     tobaccoService.getQrCode().then((res) => {
@@ -376,17 +383,16 @@ export default function index() {
     getRoomData(queryObject, current, pageSize);
   };
   const handleFilter = (input, option) => {
-    return option.children.includes(input)
-  }
+    return option.children.includes(input);
+  };
   const changeCountry = (value) => {
     console.log(value);
     if (value) {
-
       tobaccoService.getStation({ county: value }).then((res) => {
         setStationList(res);
       });
     } else {
-      setStationList([])
+      setStationList([]);
     }
   };
   return (
@@ -447,7 +453,6 @@ export default function index() {
         pagination={pagination}
         onChange={handleTableChange}
       />
-
 
       <Modal
         title="修改数据"
@@ -527,7 +532,11 @@ export default function index() {
               <Form.Item name="farmerId" label="烟农">
                 {/* <Input /> */}
                 <Select showSearch={true} allowClear={true} filterOption={handleFilter}>
-                  {farmerList.map(x => <Option value={x.id} key={x.id}>{x.name + '-' + x.phoneNumber}</Option>)}
+                  {farmerList.map((x) => (
+                    <Option value={x.id} key={x.id}>
+                      {x.name + '-' + x.phoneNumber}
+                    </Option>
+                  ))}
                 </Select>
               </Form.Item>
             </Col>
@@ -535,7 +544,11 @@ export default function index() {
               <Form.Item name="collectorId" label="采集人">
                 {/* <Input /> */}
                 <Select showSearch={true} allowClear={true} filterOption={handleFilter}>
-                  {collectorList.map(x => <Option value={x.id} key={x.id}>{x.name + '-' + x.phoneNumber}</Option>)}
+                  {collectorList.map((x) => (
+                    <Option value={x.id} key={x.id}>
+                      {x.name + '-' + x.phoneNumber}
+                    </Option>
+                  ))}
                 </Select>
               </Form.Item>
             </Col>
@@ -613,4 +626,3 @@ export default function index() {
     </>
   );
 }
-
