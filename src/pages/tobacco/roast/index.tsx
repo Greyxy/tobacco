@@ -301,9 +301,9 @@ export default function index() {
     let sampleWeight = editForm.getFieldValue('sampleWeight')
     let totalPoleAmount = editForm.getFieldValue('totalPoleAmount')
     if (greenWeight && totalPoleAmount && sampleWeight) {
-
-      let sampleTotalWeight = sampleWeight * 1 + greenWeight * 1;
-      let totalWeight = (sampleTotalWeight / 10) * totalPoleAmount;
+      console.log(greenWeight, totalPoleAmount, sampleWeight)
+      let sampleTotalWeight = Number(sampleWeight) + Number(greenWeight);
+      let totalWeight = (sampleWeight / 10) * totalPoleAmount;
       let yellowRate = (sampleWeight / sampleTotalWeight).toFixed(2);
       editForm.setFieldValue('sampleTotalWeight', sampleTotalWeight)
       editForm.setFieldValue('totalWeight', totalWeight)
@@ -454,7 +454,7 @@ export default function index() {
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="totalWeight" label="总重量(kg)">
+              <Form.Item name="totalWeight" label="黄烟总重量(kg)">
                 <Input disabled />
               </Form.Item>
             </Col>
