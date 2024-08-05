@@ -304,7 +304,7 @@ export default function index() {
       console.log(greenWeight, totalPoleAmount, sampleWeight)
       let sampleTotalWeight = Number(sampleWeight) + Number(greenWeight);
       let totalWeight = (sampleWeight / 10) * totalPoleAmount;
-      let yellowRate = (sampleWeight / sampleTotalWeight).toFixed(2);
+      let yellowRate = ((sampleWeight / sampleTotalWeight) * 100).toFixed(2) + '%';
       editForm.setFieldValue('sampleTotalWeight', sampleTotalWeight)
       editForm.setFieldValue('totalWeight', totalWeight)
       editForm.setFieldValue('yellowRate', yellowRate)
