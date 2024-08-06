@@ -14,7 +14,6 @@ import {
   Space,
   Table,
 } from 'antd';
-import moment from 'moment';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 const { Option } = Select;
@@ -52,10 +51,14 @@ export default function index() {
           <Button type="link" onClick={() => handleEdit(record)} style={{ color: colorPrimary }}>
             修改
           </Button>
+          <Button type="link" onClick={() => handleDelete(record)} style={{ color: colorPrimary }}>
+            删除
+          </Button>
         </Space>
       ),
     },
     { title: '烤房id', dataIndex: 'roomId', key: 'roomId' },
+    { title: '烤房编码', dataIndex: 'roomCode', key: 'roomCode' },
     { title: '开始时间', dataIndex: 'startTime', key: 'startTime' },
     { title: '结束时间', dataIndex: 'endTime', key: 'endTime' },
     { title: '烘烤天数', dataIndex: 'days', key: 'days' },
@@ -147,6 +150,8 @@ export default function index() {
         return record.isMainCollector == 1 ? <span>是</span> : <span>否</span>;
       },
     },
+    // updateReason
+    { title: '修改原因', dataIndex: 'updateReason', key: 'updateReason' },
     { title: '填报时间', dataIndex: 'submitTime', key: 'submitTime' },
   ];
 
@@ -158,8 +163,18 @@ export default function index() {
     obj.startTime = dayjs(obj.startTime, 'YYYY-MM-DD');
     obj.endTime = dayjs(obj.endTime, 'YYYY-MM-DD');
     console.log(obj);
+    // obj.updateReason = '';
     setEditingRecord(obj);
     editForm.resetFields();
+  };
+  const handleDelete = (reccord) => {
+    tobaccoService.backingDelete({ id: reccord.id }).then((res) => {
+      messageApi.open({
+        type: 'success',
+        content: '删除成功',
+      });
+      getRoomData(queryObject, pagination.current, pagination.pageSize);
+    });
   };
   const onFinish = (values: any) => {
     // console.log('Form values:', values, queryObject);
@@ -291,25 +306,28 @@ export default function index() {
   };
   const changeDate = () => {
     // console.log('onChange');
-    let startTime = editForm.getFieldValue('startTime')
-    let endTime = editForm.getFieldValue('endTime')
+    let startTime = editForm.getFieldValue('startTime');
+    let endTime = editForm.getFieldValue('endTime');
     if (startTime && endTime)
-      editForm.setFieldValue('days', (new Date(endTime).getTime() - new Date(startTime).getTime()) / 3600 / 24 / 1000)
+      editForm.setFieldValue(
+        'days',
+        (new Date(endTime).getTime() - new Date(startTime).getTime()) / 3600 / 24 / 1000,
+      );
   };
   const calculate = () => {
-    let greenWeight = editForm.getFieldValue('greenWeight')
-    let sampleWeight = editForm.getFieldValue('sampleWeight')
-    let totalPoleAmount = editForm.getFieldValue('totalPoleAmount')
+    let greenWeight = editForm.getFieldValue('greenWeight');
+    let sampleWeight = editForm.getFieldValue('sampleWeight');
+    let totalPoleAmount = editForm.getFieldValue('totalPoleAmount');
     if (greenWeight && totalPoleAmount && sampleWeight) {
-      console.log(greenWeight, totalPoleAmount, sampleWeight)
+      console.log(greenWeight, totalPoleAmount, sampleWeight);
       let sampleTotalWeight = Number(sampleWeight) + Number(greenWeight);
       let totalWeight = (sampleWeight / 10) * totalPoleAmount;
-      let yellowRate = ((sampleWeight / sampleTotalWeight) * 100).toFixed(2) + '%';
-      editForm.setFieldValue('sampleTotalWeight', sampleTotalWeight)
-      editForm.setFieldValue('totalWeight', totalWeight)
-      editForm.setFieldValue('yellowRate', yellowRate)
+      let yellowRate = ((sampleWeight / sampleTotalWeight) * 100).toFixed(2);
+      editForm.setFieldValue('sampleTotalWeight', sampleTotalWeight);
+      editForm.setFieldValue('totalWeight', totalWeight);
+      editForm.setFieldValue('yellowRate', yellowRate);
     }
-  }
+  };
   return (
     <div>
       {contextHolder}
@@ -325,6 +343,9 @@ export default function index() {
         </Form.Item>
         <Form.Item label="结束时间" name="endTime" style={{ marginTop: '5px' }}>
           <DatePicker format="YYYY-MM-DD" />
+        </Form.Item>
+        <Form.Item label="烤房编码" name="roomCode" style={{ marginTop: '5px' }}>
+          <Input allowClear={true} />
         </Form.Item>
         <Form.Item label="烟农" name="farmerName" style={{ marginTop: '5px' }}>
           <Input allowClear={true} />
@@ -436,30 +457,28 @@ export default function index() {
                 <Input />
               </Form.Item>
             </Col>
-
             <Col span={12}>
               <Form.Item name="samplePoleAmount" label="抽样杆数">
                 <Input onBlur={calculate} />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="greenWeight" label="青杂重量(kg)">
-                <Input onBlur={calculate} />
-              </Form.Item>
-            </Col>
-
-            <Col span={12}>
-              <Form.Item name="sampleWeight" label="黄烟重量(kg)">
+              <Form.Item name="greenWeight" label="抽样青杂重量(kg)">
                 <Input onBlur={calculate} />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="totalWeight" label="黄烟总重量(kg)">
+              <Form.Item name="sampleWeight" label="抽样黄烟重量(kg)">
+                <Input onBlur={calculate} />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item name="totalWeight" label="黄烟重量(kg)">
                 <Input disabled />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="sampleTotalWeight" label="抽样重量(kg)">
+              <Form.Item name="sampleTotalWeight" label="抽样总重量(kg)">
                 <Input disabled />
               </Form.Item>
             </Col>
@@ -467,8 +486,12 @@ export default function index() {
               <Form.Item name="yellowRate" label="黄烟率(%)">
                 <Input disabled />
               </Form.Item>
+            </Col>{' '}
+            <Col span={12}>
+              <Form.Item name="updateReason" label="修改理由">
+                <Input />
+              </Form.Item>
             </Col>
-
             {/* <Col span={12}>
               <Form.Item name="imgs" label="Images" >
                 <Input />
@@ -511,7 +534,6 @@ export default function index() {
                 </Select>
               </Form.Item>
             </Col> */}
-
             {/* <Col span={12}>
               <Form.Item name="reviewId" label="Review ID" >
                 <Input />

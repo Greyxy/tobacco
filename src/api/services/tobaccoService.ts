@@ -17,6 +17,7 @@ export enum TobaccoApi {
   // 条件查询
   backingQuery = '/backing/query',
   backingFind = '/backing/find',
+  backingDelete = '/backing/delete',
   // 二维码
   getQrCode = '/qrcode/get',
   deleteQrCodeById = '/qrcode/delete?id=',
@@ -69,7 +70,7 @@ export enum TobaccoApi {
   getCollectorByQuery = '/person/collector',
   getFarmerByQuery = '/person/farmer',
   searchFarmer = '/person/farmer/search',
-  searchCollector = '/person/collector/search'
+  searchCollector = '/person/collector/search',
 }
 const getRoomById = (id: string) => apiClient.get({ url: `${TobaccoApi.getRoomById}${id}` });
 const updateRoom = (data) => apiClient.post({ url: TobaccoApi.updateRoom, data });
@@ -77,13 +78,15 @@ const updateRoom = (data) => apiClient.post({ url: TobaccoApi.updateRoom, data }
 const getbackingByRoomId = (roomId: string) =>
   apiClient.get({ url: `${TobaccoApi.getbackingByRoomId}${roomId}` });
 const getRoomByArea = (data) => apiClient.post({ url: TobaccoApi.getRoomByArea, data });
-const updatebacking = (data) => apiClient.post({ url: TobaccoApi.updatebacking, data })
+const updatebacking = (data) => apiClient.post({ url: TobaccoApi.updatebacking, data });
 const reviewBacking = (params) => apiClient.post({ url: `${TobaccoApi.reviewBacking}`, params });
 const refuseBacking = (params) => apiClient.post({ url: `${TobaccoApi.refuseBacking}`, params });
 const backingQuery = (data: any) => {
   return apiClient.post({ url: TobaccoApi.backingQuery, data });
 };
 const backgingFind = (data) => apiClient.post({ url: `${TobaccoApi.backingFind}`, data });
+const backingDelete = (data) =>
+  apiClient.post({ url: `${TobaccoApi.backingDelete}`, params: data });
 // 二维码
 const getQrCode = (params) => apiClient.get({ url: `${TobaccoApi.getQrCode}`, params });
 const deleteQrCodeById = (id: string) =>
@@ -119,17 +122,19 @@ const getRolePermission = (roleId) =>
 const getCountry = () => apiClient.get({ url: `${TobaccoApi.getCountry}` });
 const getStation = (data) => apiClient.get({ url: `${TobaccoApi.getStation}`, params: data });
 
-// 烟农 采集人 
-const getFarmerByQuery = (data) => apiClient.get({ url: TobaccoApi.getFarmerByQuery, params: data })
-const getCollectorByQuery = (data) => apiClient.get({ url: TobaccoApi.getCollectorByQuery, params: data })
-const addFarmer = (data) => apiClient.post({ url: TobaccoApi.addFarmer, data })
-const addCollector = (data) => apiClient.post({ url: TobaccoApi.addCollector, data })
-const updateFarmer = (data) => apiClient.put({ url: TobaccoApi.updateFarmer, data })
-const updateCollector = (data) => apiClient.put({ url: TobaccoApi.updateCollector, data })
-const deleteCollectorById = (id) => apiClient.delete({ url: TobaccoApi.deleteCollectorById + id })
-const deleteFarmerById = (id) => apiClient.delete({ url: TobaccoApi.deleteFarmerById + id })
-const searchFarmer = (data) => apiClient.get({ url: TobaccoApi.searchFarmer, params: data })
-const searchCollector = (data) => apiClient.get({ url: TobaccoApi.searchCollector, params: data })
+// 烟农 采集人
+const getFarmerByQuery = (data) =>
+  apiClient.get({ url: TobaccoApi.getFarmerByQuery, params: data });
+const getCollectorByQuery = (data) =>
+  apiClient.get({ url: TobaccoApi.getCollectorByQuery, params: data });
+const addFarmer = (data) => apiClient.post({ url: TobaccoApi.addFarmer, data });
+const addCollector = (data) => apiClient.post({ url: TobaccoApi.addCollector, data });
+const updateFarmer = (data) => apiClient.put({ url: TobaccoApi.updateFarmer, data });
+const updateCollector = (data) => apiClient.put({ url: TobaccoApi.updateCollector, data });
+const deleteCollectorById = (id) => apiClient.delete({ url: TobaccoApi.deleteCollectorById + id });
+const deleteFarmerById = (id) => apiClient.delete({ url: TobaccoApi.deleteFarmerById + id });
+const searchFarmer = (data) => apiClient.get({ url: TobaccoApi.searchFarmer, params: data });
+const searchCollector = (data) => apiClient.get({ url: TobaccoApi.searchCollector, params: data });
 
 export default {
   getRoomById,
@@ -142,6 +147,7 @@ export default {
   login,
   backingQuery,
   backgingFind,
+  backingDelete,
   getQrCode,
   deleteQrCodeById,
   getQrCodeById,
@@ -176,5 +182,5 @@ export default {
   deleteCollectorById,
   updateCollector,
   searchFarmer,
-  searchCollector
+  searchCollector,
 };
