@@ -215,7 +215,7 @@ export default function QrCode() {
       };
       const token = JSON.parse(localStorage.getItem('token') || '{}').accessToken;
 
-      const response = await fetch('https://mgr.sctworks.com:65532/service/img/getCode', {
+      const response = await fetch('https://mgr.sctworks.com:65533/service/img/getCode', {
         method: 'post',
         headers: {
           Token: token,

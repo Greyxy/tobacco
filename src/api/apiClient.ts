@@ -8,7 +8,7 @@ import { Result } from '#/api';
 // 创建 axios 实例
 const axiosInstance = axios.create({
   // baseURL: import.meta.env.VITE_APP_BASE_API,
-  baseURL: 'https://mgr.sctworks.com:65532/service/',
+  baseURL: 'https://mgr.sctworks.com:65533/service/',
   timeout: 50000,
   headers: { 'Content-Type': 'application/json;charset=utf-8' },
 });

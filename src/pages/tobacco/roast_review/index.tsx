@@ -51,6 +51,7 @@ function parseTime(data) {
 }
 export default function index() {
   const [tableData, setTableData] = useState<TableData[]>([]);
+  const [allBakingDataStatusZero, setAllBakingDataStatusZero] = useState(false)
   const [status, setStatus] = useState<string>();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [selectedRow, setSelectedRow] = useState<TableData>();
@@ -62,7 +63,8 @@ export default function index() {
   const [showRemark, setShowRemark] = useState(false)
   const [cityList, setCityList] = useState([]);
   const [stationList, setStationList] = useState([]);
-
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [batchFlag, setBatchFlag] = useState(false)
   useEffect(() => {
     getRoomData(queryObject, pagination.current, pagination.pageSize);
     getCityList()
@@ -74,7 +76,7 @@ export default function index() {
         setPagination({ ...pagination, current: page, pageSize, total: res.total });
         res = res.records || [];
         let currentIndex = 0;
-        res.forEach(async (item: TableData) => {
+        res.forEach(async (item, index) => {
           item.modifyTime = parseTime(item.modifyTime);
           item.createTime = parseTime(item.createTime);
           item.submitTime = parseTime(item.submitTime);
@@ -96,6 +98,8 @@ export default function index() {
         let timer = setInterval(() => {
           if ((currentIndex = res.length - 1)) {
             clearInterval(timer);
+            // console.log(res, res.every(x => x.bakingDataStatus == '0'))
+            // setAllBakingDataStatusZero(res.every(x => x.bakingDataStatus == 0))
             setTableData(res);
             setKey(new Date().getTime());
           }
@@ -110,11 +114,13 @@ export default function index() {
       key: 'action',
       fixed: 'left',
       render: (text: any, record: any) => (
-        <Space size="middle">
-          <Button type="link" style={{ color: colorPrimary }} onClick={() => reviewHandle(record)}>
-            审核
-          </Button>
-        </Space>
+        record.bakingDataStatus === 0 ? (
+          <Space size="middle">
+            <Button type="link" style={{ color: colorPrimary }} onClick={() => reviewHandle(record)}>
+              审核
+            </Button>
+          </Space>
+        ) : null
       ),
     },
     // { title: 'id', dataIndex: 'id', key: 'id' },
@@ -136,6 +142,7 @@ export default function index() {
       },
     },
     { title: '烤房id', dataIndex: 'roomId', key: 'roomId' },
+    { title: '烤房编码', dataIndex: 'roomCode', key: 'roomCode' },
     { title: '开始时间', dataIndex: 'startTime', key: 'startTime' },
     { title: '结束时间', dataIndex: 'endTime', key: 'endTime' },
     { title: '烘烤天数', dataIndex: 'days', key: 'days' },
@@ -173,11 +180,11 @@ export default function index() {
     },
     { title: '夹烟工具', dataIndex: 'tool', key: 'tool' },
     { title: '总竿数', dataIndex: 'totalPoleAmount', key: 'totalPoleAmount' },
-    { title: '总重量', dataIndex: 'totalWeight', key: 'totalWeight' },
+    { title: '总黄烟重量', dataIndex: 'totalWeight', key: 'totalWeight' },
     { title: '抽样杆数', dataIndex: 'samplePoleAmount', key: 'samplePoleAmount' },
-    { title: '抽样重量', dataIndex: 'sampleWeight', key: 'sampleWeight' },
-    { title: '青杂重量', dataIndex: 'greenWeight', key: 'greenWeight' },
-    { title: '抽样重量', dataIndex: 'sampleTotalWeight', key: 'sampleTotalWeight' },
+    { title: '抽样黄烟重量', dataIndex: 'sampleWeight', key: 'sampleWeight' },
+    { title: '抽样青杂重量', dataIndex: 'greenWeight', key: 'greenWeight' },
+    { title: '抽样黄烟重量', dataIndex: 'sampleTotalWeight', key: 'sampleTotalWeight' },
     { title: '黄烟率', dataIndex: 'yellowRate', key: 'yellowRate' },
     { title: '经度', dataIndex: 'longitude', key: 'longitude' },
     { title: '纬度', dataIndex: 'latitude', key: 'latitude' },
@@ -419,7 +426,7 @@ export default function index() {
       },
     },
     {
-      title: '总重量',
+      title: '总黄烟重量',
       dataIndex: 'totalWeight',
       key: 'totalWeight',
       render: (text, record, index) => {
@@ -453,7 +460,7 @@ export default function index() {
       },
     },
     {
-      title: '抽样重量',
+      title: '抽样黄烟重量',
       dataIndex: 'sampleWeight',
       key: 'sampleWeight',
       render: (text, record, index) => {
@@ -470,7 +477,7 @@ export default function index() {
       },
     },
     {
-      title: '青杂重量',
+      title: '抽样青杂重量',
       dataIndex: 'greenWeight',
       key: 'greenWeight',
       render: (text, record, index) => {
@@ -487,7 +494,7 @@ export default function index() {
       },
     },
     {
-      title: '抽样重量',
+      title: '抽样黄烟重量',
       dataIndex: 'sampleTotalWeight',
       key: 'sampleTotalWeight',
       render: (text, record, index) => {
@@ -694,29 +701,34 @@ export default function index() {
     });
   };
   const onReviewFinish = (values) => {
-    let id = selectedRow.id;
-    if (values.status == '1') {
-      tobaccoService.reviewBacking({ id }).then((res) => {
-        if (res) {
-          messageApi.open({
-            type: 'success',
-            content: '审核成功',
-          });
-        }
-        getRoomData(values, pagination.current, pagination.pageSize);
-        setIsModalVisible(false);
-      });
+    if (batchFlag) {
+      setBatchFlag(false)
     } else {
-      tobaccoService.refuseBacking({ id, remark: values.remark }).then((res) => {
-        getRoomData(values, pagination.current, pagination.pageSize);
-        setIsModalVisible(false);
-        if (res) {
-          messageApi.open({
-            type: 'success',
-            content: '审核成功',
-          });
-        }
-      });
+
+      let id = selectedRow.id;
+      if (values.status == '1') {
+        tobaccoService.reviewBacking({ id }).then((res) => {
+          if (res) {
+            messageApi.open({
+              type: 'success',
+              content: '审核成功',
+            });
+          }
+          getRoomData(values, pagination.current, pagination.pageSize);
+          setIsModalVisible(false);
+        });
+      } else {
+        tobaccoService.refuseBacking({ id, remark: values.remark }).then((res) => {
+          getRoomData(values, pagination.current, pagination.pageSize);
+          setIsModalVisible(false);
+          if (res) {
+            messageApi.open({
+              type: 'success',
+              content: '审核成功',
+            });
+          }
+        });
+      }
     }
   };
   const handleCancel = () => {
@@ -752,56 +764,80 @@ export default function index() {
     }
 
   };
+
+  const onSelectChange = (newSelectedRowKeys) => {
+    console.log(newSelectedRowKeys)
+    setSelectedRowKeys(newSelectedRowKeys);
+  };
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: onSelectChange,
+  };
+  const reviewListHandle = () => {
+    setBatchFlag(true)
+    setIsModalVisible(true)
+  }
   return (
     <>
       {contextHolder}
       <div>
-        <Form name="search_form" layout="inline" onFinish={onFinish} initialValues={queryObject}>
-          <Form.Item name="status" label="状态" style={{ marginTop: '5px' }}>
-            <Select placeholder="请选择审核状态" style={{ width: 200, }} >
-              <Option value="0">待审核</Option>
-              <Option value="1">审核通过</Option>
-              <Option value="2">审核不通过</Option>
-            </Select>
-          </Form.Item>
-          <Form.Item label="烟农" name="farmerName" style={{ marginTop: '5px' }}>
-            <Input allowClear={true} />
-          </Form.Item>
-          <Form.Item name="farmerPhone" label="烟农手机号" style={{ marginTop: '5px' }}>
-            <Input allowClear={true} />
-          </Form.Item>
-          <Form.Item label="采集人" name="collectorName" style={{ marginTop: '5px' }}>
-            <Input allowClear={true} />
-          </Form.Item>
-          <Form.Item name="collectorPhone" label="采集人手机号" style={{ marginTop: '5px' }}>
-            <Input allowClear={true} />
-          </Form.Item>
-          <Form.Item label="县公司" name="county" style={{ marginTop: '5px' }}>
-            <Select style={{ width: 200 }} onChange={changeCountry} allowClear>
-              {cityList.map((x) => (
-                <Option key={x} value={x}>
-                  {x}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-          <Form.Item label="烟站名称" name="stationName" style={{ marginTop: '5px' }}>
-            {/* <Input allowClear={true} /> */}
-            <Select style={{ width: 200 }} allowClear>
-              {stationList.map((x) => (
-                <Option key={x} value={x}>
-                  {x}
-                </Option>
-              ))}
-            </Select>
-          </Form.Item>
-          <Form.Item style={{ marginTop: '5px' }}>
-            <Button type="primary" htmlType="submit">
-              查询
-            </Button>
-          </Form.Item>
-        </Form>
+        <div className="flex justify-between">
 
+          <Form name="search_form" layout="inline" onFinish={onFinish} initialValues={queryObject}>
+            <Form.Item name="status" label="状态" style={{ marginTop: '5px' }}>
+              <Select placeholder="请选择审核状态" style={{ width: 200, }} >
+                <Option value="0">待审核</Option>
+                <Option value="1">审核通过</Option>
+                <Option value="2">审核不通过</Option>
+              </Select>
+            </Form.Item>
+            <Form.Item label="烤房编码" name="roomCode" style={{ marginTop: '5px' }}>
+              <Input allowClear={true} />
+            </Form.Item>
+            <Form.Item label="烟农" name="farmerName" style={{ marginTop: '5px' }}>
+              <Input allowClear={true} />
+            </Form.Item>
+            <Form.Item name="farmerPhone" label="烟农手机号" style={{ marginTop: '5px' }}>
+              <Input allowClear={true} />
+            </Form.Item>
+            <Form.Item label="采集人" name="collectorName" style={{ marginTop: '5px' }}>
+              <Input allowClear={true} />
+            </Form.Item>
+            <Form.Item name="collectorPhone" label="采集人手机号" style={{ marginTop: '5px' }}>
+              <Input allowClear={true} />
+            </Form.Item>
+            <Form.Item label="县公司" name="county" style={{ marginTop: '5px' }}>
+              <Select style={{ width: 200 }} onChange={changeCountry} allowClear>
+                {cityList.map((x) => (
+                  <Option key={x} value={x}>
+                    {x}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item label="烟站名称" name="stationName" style={{ marginTop: '5px' }}>
+              {/* <Input allowClear={true} /> */}
+              <Select style={{ width: 200 }} allowClear>
+                {stationList.map((x) => (
+                  <Option key={x} value={x}>
+                    {x}
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+            <Form.Item style={{ marginTop: '5px' }}>
+              <Button type="primary" htmlType="submit">
+                查询
+              </Button>
+            </Form.Item>
+          </Form>
+          <div>
+
+            <Button style={{ color: colorPrimary }} type="primary" onClick={() => reviewListHandle()}>
+              批量审核
+            </Button>
+          </div>
+        </div>
         <Table
           key={key}
           columns={columns}
@@ -811,7 +847,7 @@ export default function index() {
           scroll={{ x: true }}
           onChange={handleTableChange}
           pagination={pagination}
-        />
+          rowSelection={allBakingDataStatusZero ? rowSelection : null} />
       </div>
       <Modal
         title="审核数据"
@@ -847,15 +883,22 @@ export default function index() {
             </Col>
           </Row>
         </Form>
-        <div className="w-96%  m-5px mx-2% border border-solid border-gray-300"></div>
-        <Table
-          dataSource={historyData}
-          columns={hisColumns}
-          key={key1}
-          rowKey="id"
-          className="mt-6 whitespace-nowrap"
-          scroll={{ x: true }}
-        />
+        {
+          !batchFlag &&
+          (<>
+            <div className="w-96%  m-5px mx-2% border border-solid border-gray-300"></div>
+            <Table
+              dataSource={historyData}
+              columns={hisColumns}
+              key={key1}
+              rowKey="id"
+              className="mt-6 whitespace-nowrap"
+              scroll={{ x: true }}
+            />
+          </>
+          )
+        }
+
       </Modal>
     </>
   );

@@ -44,7 +44,6 @@ export default function RolePage() {
   const getUserList = () => {
     tobaccoService.getAllUser().then((res) => {
       let records = res.records || [];
-
       setTableData(records);
     });
   };
@@ -249,7 +248,7 @@ export default function RolePage() {
         <Table
           rowKey="id"
           size="small"
-          scroll={{ x: 'max-content' }}
+          scroll={{ x: 'max-content', y: 600 }}
           pagination={false}
           columns={columns}
           dataSource={tableData}
