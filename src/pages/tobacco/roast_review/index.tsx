@@ -98,6 +98,9 @@ export default function index() {
         let timer = setInterval(() => {
           if ((currentIndex = res.length - 1)) {
             clearInterval(timer);
+            let showCheckbox = res.every(x => x.bakingDataStatus == 0)
+            console.log(res, showCheckbox)
+            setAllBakingDataStatusZero(showCheckbox)
             // console.log(res, res.every(x => x.bakingDataStatus == '0'))
             // setAllBakingDataStatusZero(res.every(x => x.bakingDataStatus == 0))
             setTableData(res);
@@ -702,7 +705,14 @@ export default function index() {
   };
   const onReviewFinish = (values) => {
     if (batchFlag) {
-      setBatchFlag(false)
+
+      tobaccoService.batchReview(selectedRowKeys).then(res => {
+        message.open({
+          type: 'success',
+          content: '批量审核成功'
+        })
+        setBatchFlag(false)
+      })
     } else {
 
       let id = selectedRow.id;
@@ -774,8 +784,30 @@ export default function index() {
     onChange: onSelectChange,
   };
   const reviewListHandle = () => {
-    setBatchFlag(true)
-    setIsModalVisible(true)
+    if (selectedRowKeys.length) {
+
+      tobaccoService.batchReview(selectedRowKeys).then(res => {
+        if (res) {
+
+          message.open({
+            type: 'success',
+            content: '批量审核成功'
+          })
+          getRoomData(queryObject, pagination.current, pagination.pageSize);
+          setSelectedRowKeys([])
+        }
+
+        // setBatchFlag(false)
+      })
+    } else {
+      message.open({
+        type: 'warning',
+        content: '请选择至少一条待审核数据'
+      })
+    }
+
+    // setBatchFlag(true)
+    // setIsModalVisible(true)
   }
   return (
     <>
@@ -832,8 +864,7 @@ export default function index() {
             </Form.Item>
           </Form>
           <div>
-
-            <Button style={{ color: colorPrimary }} type="primary" onClick={() => reviewListHandle()}>
+            <Button type="primary" onClick={() => reviewListHandle()}>
               批量审核
             </Button>
           </div>

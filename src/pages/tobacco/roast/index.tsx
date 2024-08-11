@@ -52,12 +52,14 @@ export default function index() {
           <Button type="link" onClick={() => handleEdit(record)} style={{ color: colorPrimary }}>
             修改
           </Button>
+          <Button type="link" onClick={() => handleDelete(record)} style={{ color: colorPrimary }}>
+            删除
+          </Button>
         </Space>
       ),
     },
     { title: '烤房id', dataIndex: 'roomId', key: 'roomId' },
     { title: '烤房编码', dataIndex: 'roomCode', key: 'roomCode' },
-
     {
       title: '烟农',
       // dataIndex: 'farmer.farmerName',
@@ -75,6 +77,10 @@ export default function index() {
     },
     { title: '开始烘烤时间', dataIndex: 'startTime', key: 'startTime', sorter: (a, b) => new Date(a.startTime) - new Date(b.startTime) },
     { title: '结束烘烤时间', dataIndex: 'endTime', key: 'endTime', sorter: (a, b) => new Date(a.endTime) - new Date(b.endTime) },
+    // { title: '开始填报时间', dataIndex: 'startTimeStamp', key: 'startTimeStamp', sorter: (a, b) => new Date(a.startTimeStamp) - new Date(b.startTimeStamp) },
+    // { title: '结束填报时间', dataIndex: 'endTimeStamp', key: 'endTimeStamp', sorter: (a, b) => new Date(a.endTimeStamp) - new Date(b.endTimeStamp) },
+    { title: '填报时间', dataIndex: 'submitTime', key: 'submitTime', sorter: (a, b) => new Date(a.submitTime) - new Date(b.submitTime) },
+
     { title: '烘烤天数', dataIndex: 'days', key: 'days', sorter: (a, b) => a.days - b.days, },
     { title: '炕次', dataIndex: 'sequence', key: 'sequence' },
     { title: '部位', dataIndex: 'part', key: 'part' },
@@ -118,7 +124,7 @@ export default function index() {
     { title: '总黄烟重量', dataIndex: 'totalWeight', key: 'totalWeight', sorter: (a, b) => a.totalWeight - b.totalWeight, },
     { title: '抽样杆数', dataIndex: 'samplePoleAmount', key: 'samplePoleAmount', sorter: (a, b) => a.samplePoleAmount - b.samplePoleAmount, },
     { title: '抽样黄烟重量', dataIndex: 'sampleWeight', key: 'sampleWeight', sorter: (a, b) => a.sampleWeight - b.sampleWeight, },
-    { title: '抽样抽样青杂重量', dataIndex: 'greenWeight', key: 'greenWeight', sorter: (a, b) => a.greenWeight - b.greenWeight, },
+    { title: '抽样青杂重量', dataIndex: 'greenWeight', key: 'greenWeight', sorter: (a, b) => a.greenWeight - b.greenWeight, },
     { title: '抽样总黄烟重量', dataIndex: 'sampleTotalWeight', key: 'sampleTotalWeight', sorter: (a, b) => a.sampleTotalWeight - b.sampleTotalWeight, },
     { title: '黄烟率', dataIndex: 'yellowRate', key: 'yellowRate', sorter: (a, b) => a.yellowRate - b.yellowRate, },
     { title: '经度', dataIndex: 'longitude', key: 'longitude' },
@@ -151,7 +157,8 @@ export default function index() {
         return record.isMainCollector == 1 ? <span>是</span> : <span>否</span>;
       },
     },
-    { title: '填报时间', dataIndex: 'submitTime', key: 'submitTime' },
+    // updateReason
+    { title: '修改原因', dataIndex: 'updateReason', key: 'updateReason' },
   ];
 
   columns.forEach((item) => (item.align = 'center'));
@@ -162,8 +169,18 @@ export default function index() {
     obj.startTime = dayjs(obj.startTime, 'YYYY-MM-DD');
     obj.endTime = dayjs(obj.endTime, 'YYYY-MM-DD');
     console.log(obj);
+    // obj.updateReason = '';
     setEditingRecord(obj);
     editForm.resetFields();
+  };
+  const handleDelete = (reccord) => {
+    tobaccoService.backingDelete({ id: reccord.id }).then((res) => {
+      messageApi.open({
+        type: 'success',
+        content: '删除成功',
+      });
+      getRoomData(queryObject, pagination.current, pagination.pageSize);
+    });
   };
   const onFinish = (values: any) => {
     // console.log('Form values:', values, queryObject);
@@ -171,6 +188,9 @@ export default function index() {
       ...values,
       startTime: values.startTime ? values.startTime.format('YYYY-MM-DD') : null,
       endTime: values.endTime ? values.endTime.format('YYYY-MM-DD') : null,
+      startTimeStamp: values.startTimeStamp ? values.startTimeStamp.format('YYYY-MM-DD') : null,
+      endTimeStamp: values.endTimeStamp ? values.endTimeStamp.format('YYYY-MM-DD') : null,
+
       roomId: '',
     };
     queryObject = formattedValues;
@@ -187,6 +207,7 @@ export default function index() {
   const [farmerList, setFarmerList] = useState([]);
   const [collectorList, setCollectorList] = useState([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [isOtherSelected, setIsOtherSelected] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
   useEffect(() => {
@@ -297,23 +318,26 @@ export default function index() {
   };
   const changeDate = () => {
     // console.log('onChange');
-    let startTime = editForm.getFieldValue('startTime')
-    let endTime = editForm.getFieldValue('endTime')
+    let startTime = editForm.getFieldValue('startTime');
+    let endTime = editForm.getFieldValue('endTime');
     if (startTime && endTime)
-      editForm.setFieldValue('days', (new Date(endTime).getTime() - new Date(startTime).getTime()) / 3600 / 24 / 1000)
+      editForm.setFieldValue(
+        'days',
+        (new Date(endTime).getTime() - new Date(startTime).getTime()) / 3600 / 24 / 1000,
+      );
   };
   const calculate = () => {
-    let greenWeight = editForm.getFieldValue('greenWeight')
-    let sampleWeight = editForm.getFieldValue('sampleWeight')
-    let totalPoleAmount = editForm.getFieldValue('totalPoleAmount')
+    let greenWeight = editForm.getFieldValue('greenWeight');
+    let sampleWeight = editForm.getFieldValue('sampleWeight');
+    let totalPoleAmount = editForm.getFieldValue('totalPoleAmount');
     if (greenWeight && totalPoleAmount && sampleWeight) {
-      console.log(greenWeight, totalPoleAmount, sampleWeight)
+      console.log(greenWeight, totalPoleAmount, sampleWeight);
       let sampleTotalWeight = Number(sampleWeight) + Number(greenWeight);
       let totalWeight = (sampleWeight / 10) * totalPoleAmount;
-      let yellowRate = ((sampleWeight / sampleTotalWeight) * 100).toFixed(2) + '%';
-      editForm.setFieldValue('sampleTotalWeight', sampleTotalWeight)
-      editForm.setFieldValue('totalWeight', totalWeight)
-      editForm.setFieldValue('yellowRate', yellowRate)
+      let yellowRate = ((sampleWeight / sampleTotalWeight) * 100).toFixed(2);
+      editForm.setFieldValue('sampleTotalWeight', sampleTotalWeight);
+      editForm.setFieldValue('totalWeight', totalWeight);
+      editForm.setFieldValue('yellowRate', yellowRate);
     }
   }
   const onSelectChange = (newSelectedRowKeys) => {
@@ -325,24 +349,44 @@ export default function index() {
     selectedRowKeys,
     onChange: onSelectChange,
   };
-  const exportData = () => {
-    // 
+  const exportData = async () => {
+    // const token = JSON.parse(localStorage.getItem('token') || '{}').accessToken;
+
+    // const response = await fetch(window.config.baseUrl + 'api/excel/download', {
+    //   method: 'get',
+    //   headers: {
+    //     Token: token,
+    //     'Content-Type': 'application/json',
+    //   },
+    //   // body: JSON.stringify(obj),
+    // });
+    // const blob = await response.blob();
+    // const url = window.URL.createObjectURL(blob);
+    // const link = document.createElement('a');
+    // link.href = url;
+    // link.download = '烘烤数据.xls';
+    // document.body.appendChild(link);
+    // link.click();
+    // document.body.removeChild(link);
+
     let headers = columns.map(x => x.title)
     let data = tableData.filter(x => selectedRowKeys.includes(x.id))
     const dataWithHeaders = [
       headers,
       // ...data.map(item => [item])
       ...data.map(item => columns.map(col => {
-        if (col.title == '烟农') {
-          console.log(item[col.key], item[col.key].name)
-          return item[col.key].name
-        }
-        else if (col.title == '烟农手机号') return item[col.key].phoneNumber
-        else if (col.title == '烟农身份证号') return item[col.key].idNumber
-        else if (col.title == '采集人') return item[col.key].name
-        else if (col.title == '采集人手机号') return item[col.key].phoneNumber
-        else if (col.title == '采集人身份证号') return item[col.key].idNumber
-        else return item[col.key]
+        if (item[col.key]) {
+
+          if (col.title == '烟农') {
+            return item[col.key].name
+          }
+          else if (col.title == '烟农手机号') return item[col.key].phoneNumber
+          else if (col.title == '烟农身份证号') return item[col.key].idNumber
+          else if (col.title == '采集人') return item[col.key].name
+          else if (col.title == '采集人手机号') return item[col.key].phoneNumber
+          else if (col.title == '采集人身份证号') return item[col.key].idNumber
+          else return item[col.key]
+        } else return ''
       }))
     ];
     console.log(dataWithHeaders, 'dataWithHeaders')
@@ -353,6 +397,18 @@ export default function index() {
     XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
     XLSX.writeFile(wb, '烘烤数据.xlsx');
   }
+  const handleSelectChange = (value) => {
+    if (value === '其他') {
+      setIsOtherSelected(true);
+    } else {
+      setIsOtherSelected(false);
+    }
+  };
+  const handleInputBlur = (value) => {
+    if (editForm.getFieldValue('updateReason') === '') {
+      setIsOtherSelected(false);
+    }
+  };
   return (
     <div>
       {contextHolder}
@@ -369,6 +425,12 @@ export default function index() {
             <DatePicker format="YYYY-MM-DD" />
           </Form.Item>
           <Form.Item label="结束烘烤时间" name="endTime" style={{ marginTop: '5px' }}>
+            <DatePicker format="YYYY-MM-DD" />
+          </Form.Item>
+          <Form.Item label="开始填报时间" name="startTimeStamp" style={{ marginTop: '5px' }}>
+            <DatePicker format="YYYY-MM-DD" />
+          </Form.Item>
+          <Form.Item label="结束填报时间" name="endTimeStamp" style={{ marginTop: '5px' }}>
             <DatePicker format="YYYY-MM-DD" />
           </Form.Item>
           <Form.Item label="烟农" name="farmerName" style={{ marginTop: '5px' }}>
@@ -492,7 +554,6 @@ export default function index() {
                 <Input />
               </Form.Item>
             </Col>
-
             <Col span={12}>
               <Form.Item name="samplePoleAmount" label="抽样杆数">
                 <Input onBlur={calculate} />
@@ -503,9 +564,8 @@ export default function index() {
                 <Input onBlur={calculate} />
               </Form.Item>
             </Col>
-
             <Col span={12}>
-              <Form.Item name="sampleWeight" label="黄烟重量(kg)">
+              <Form.Item name="sampleWeight" label="抽样黄烟重量(kg)">
                 <Input onBlur={calculate} />
               </Form.Item>
             </Col>
@@ -523,8 +583,30 @@ export default function index() {
               <Form.Item name="yellowRate" label="黄烟率(%)">
                 <Input disabled />
               </Form.Item>
-            </Col>
+            </Col>{' '}
+            <Col span={12}>
+              <Form.Item name="updateReason" label="修改理由" rules={[{ required: true, message: '修改理由是必填项' }]}>
 
+                {/* <Select>
+                  <Option value='测产人员日期填报错误'>测产人员日期填报错误</Option>
+                  <Option value='测产人员重量填报错误'>测产人员重量填报错误</Option>
+                  <Option value='网络原因'>网络原因</Option>
+                  <Option value='其他'>其他</Option>
+                </Select> */}
+                {isOtherSelected ? (
+                  <Input
+                    onBlur={handleInputBlur}
+                  />
+                ) : (
+                  <Select onChange={handleSelectChange}>
+                    <Option value='测产人员日期填报错误'>测产人员日期填报错误</Option>
+                    <Option value='测产人员重量填报错误'>测产人员重量填报错误</Option>
+                    <Option value='网络原因'>网络原因</Option>
+                    <Option value='其他'>其他</Option>
+                  </Select>
+                )}
+              </Form.Item>
+            </Col>
             {/* <Col span={12}>
               <Form.Item name="imgs" label="Images" >
                 <Input />
@@ -567,7 +649,6 @@ export default function index() {
                 </Select>
               </Form.Item>
             </Col> */}
-
             {/* <Col span={12}>
               <Form.Item name="reviewId" label="Review ID" >
                 <Input />
@@ -578,7 +659,7 @@ export default function index() {
                 <Input />
               </Form.Item>
             </Col> */}
-          </Row>
+          </Row >
 
           <Form.Item style={{ textAlign: 'right' }}>
             {/* <Button type="primary" htmlType="cancel" >
@@ -588,8 +669,8 @@ export default function index() {
               确定
             </Button>
           </Form.Item>
-        </Form>
-      </Modal>
-    </div>
+        </Form >
+      </Modal >
+    </div >
   );
 }
