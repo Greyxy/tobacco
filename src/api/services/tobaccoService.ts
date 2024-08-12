@@ -14,7 +14,8 @@ export enum TobaccoApi {
   // 审核
   reviewBacking = '/backing/review',
   refuseBacking = '/backing/refuse',
-  // 条件查询
+  batchReview = '/backing/reviewAll',
+  // 条件查询,
   backingQuery = '/backing/query',
   backingFind = '/backing/find',
   backingDelete = '/backing/delete',
@@ -81,6 +82,7 @@ const getRoomByArea = (data) => apiClient.post({ url: TobaccoApi.getRoomByArea, 
 const updatebacking = (data) => apiClient.post({ url: TobaccoApi.updatebacking, data });
 const reviewBacking = (params) => apiClient.post({ url: `${TobaccoApi.reviewBacking}`, params });
 const refuseBacking = (params) => apiClient.post({ url: `${TobaccoApi.refuseBacking}`, params });
+const batchReview = (data) => apiClient.post({ url: TobaccoApi.batchReview, data })
 const backingQuery = (data: any) => {
   return apiClient.post({ url: TobaccoApi.backingQuery, data });
 };
@@ -144,6 +146,7 @@ export default {
   getRoomByArea,
   reviewBacking,
   refuseBacking,
+  batchReview,
   login,
   backingQuery,
   backgingFind,

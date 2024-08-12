@@ -185,7 +185,7 @@ export default function QrCode() {
     }
   };
   const getQrCodeData = (data, page, pageSize) => {
-    tobaccoService.getQrCode({ ...data, page, pageSize }).then((res) => {
+    tobaccoService.getQrCode({ currentPage: page, pageSize }).then((res) => {
       setPagination({ ...pagination, current: page, pageSize, total: res.total });
       res = res.records;
       setRemarkList(res.map((x) => x.remark));
@@ -215,7 +215,7 @@ export default function QrCode() {
       };
       const token = JSON.parse(localStorage.getItem('token') || '{}').accessToken;
 
-      const response = await fetch('https://mgr.sctworks.com:65532/service/img/getCode', {
+      const response = await fetch(window.config.baseUrl + 'img/getCode', {
         method: 'post',
         headers: {
           Token: token,
@@ -373,7 +373,7 @@ export default function QrCode() {
           initialValues={queryObject}
         >
           <Form.Item name="remark" label="备注">
-            <Select placeholder="" style={{ width: 200 }} allowClear>
+            <Select placeholder="" style={{ width: 200 }} allowClear showSearch>
               {remarkList.map((x, index) => (
                 <Option key={index} value={x}>
                   {x}

@@ -14,6 +14,7 @@ import {
   Space,
   Table,
 } from 'antd';
+import * as XLSX from 'xlsx';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
 const { Option } = Select;
@@ -59,11 +60,6 @@ export default function index() {
     },
     { title: '烤房id', dataIndex: 'roomId', key: 'roomId' },
     { title: '烤房编码', dataIndex: 'roomCode', key: 'roomCode' },
-    { title: '开始时间', dataIndex: 'startTime', key: 'startTime' },
-    { title: '结束时间', dataIndex: 'endTime', key: 'endTime' },
-    { title: '烘烤天数', dataIndex: 'days', key: 'days' },
-    { title: '炕次', dataIndex: 'sequence', key: 'sequence' },
-    { title: '部位', dataIndex: 'part', key: 'part' },
     {
       title: '烟农',
       // dataIndex: 'farmer.farmerName',
@@ -72,6 +68,23 @@ export default function index() {
         return <span>{record?.farmer?.name || ''}</span>;
       },
     },
+    {
+      title: '采集人',
+      key: 'collector',
+      render: (record) => {
+        return <span>{record?.collector?.name || ''}</span>;
+      },
+    },
+    { title: '开始烘烤时间', dataIndex: 'startTime', key: 'startTime', sorter: (a, b) => new Date(a.startTime) - new Date(b.startTime) },
+    { title: '结束烘烤时间', dataIndex: 'endTime', key: 'endTime', sorter: (a, b) => new Date(a.endTime) - new Date(b.endTime) },
+    // { title: '开始填报时间', dataIndex: 'startTimeStamp', key: 'startTimeStamp', sorter: (a, b) => new Date(a.startTimeStamp) - new Date(b.startTimeStamp) },
+    // { title: '结束填报时间', dataIndex: 'endTimeStamp', key: 'endTimeStamp', sorter: (a, b) => new Date(a.endTimeStamp) - new Date(b.endTimeStamp) },
+    { title: '填报时间', dataIndex: 'submitTime', key: 'submitTime', sorter: (a, b) => new Date(a.submitTime) - new Date(b.submitTime) },
+
+    { title: '烘烤天数', dataIndex: 'days', key: 'days', sorter: (a, b) => a.days - b.days, },
+    { title: '炕次', dataIndex: 'sequence', key: 'sequence' },
+    { title: '部位', dataIndex: 'part', key: 'part' },
+
     {
       title: '烟农手机号',
       // dataIndex: 'farmer.farmerName',
@@ -88,16 +101,10 @@ export default function index() {
         return <span>{record?.farmer?.idNumber || ''}</span>;
       },
     },
-    {
-      title: '采集人',
-      key: 'collect',
-      render: (record) => {
-        return <span>{record?.collector?.name || ''}</span>;
-      },
-    },
+
     {
       title: '采集人手机号',
-      key: 'collect',
+      key: 'collector',
       render: (record) => {
         return <span>{record?.collector?.phoneNumber || ''}</span>;
       },
@@ -105,7 +112,7 @@ export default function index() {
     {
       title: '采集人身份证号',
       // dataIndex: 'farmer.farmerName',
-      key: 'farmer',
+      key: 'collector',
       render: (record) => {
         return <span>{record?.collector?.idNumber || ''}</span>;
       },
@@ -114,12 +121,12 @@ export default function index() {
     { title: '烟站名称', dataIndex: 'stationName', key: 'stationName' },
     { title: '夹烟工具', dataIndex: 'tool', key: 'tool' },
     { title: '总竿数', dataIndex: 'totalPoleAmount', key: 'totalPoleAmount' },
-    { title: '总重量', dataIndex: 'totalWeight', key: 'totalWeight' },
-    { title: '抽样杆数', dataIndex: 'samplePoleAmount', key: 'samplePoleAmount' },
-    { title: '抽样重量', dataIndex: 'sampleWeight', key: 'sampleWeight' },
-    { title: '青杂重量', dataIndex: 'greenWeight', key: 'greenWeight' },
-    { title: '抽样重量', dataIndex: 'sampleTotalWeight', key: 'sampleTotalWeight' },
-    { title: '黄烟率', dataIndex: 'yellowRate', key: 'yellowRate' },
+    { title: '总黄烟重量', dataIndex: 'totalWeight', key: 'totalWeight', sorter: (a, b) => a.totalWeight - b.totalWeight, },
+    { title: '抽样杆数', dataIndex: 'samplePoleAmount', key: 'samplePoleAmount', sorter: (a, b) => a.samplePoleAmount - b.samplePoleAmount, },
+    { title: '抽样黄烟重量', dataIndex: 'sampleWeight', key: 'sampleWeight', sorter: (a, b) => a.sampleWeight - b.sampleWeight, },
+    { title: '抽样青杂重量', dataIndex: 'greenWeight', key: 'greenWeight', sorter: (a, b) => a.greenWeight - b.greenWeight, },
+    { title: '抽样总黄烟重量', dataIndex: 'sampleTotalWeight', key: 'sampleTotalWeight', sorter: (a, b) => a.sampleTotalWeight - b.sampleTotalWeight, },
+    { title: '黄烟率', dataIndex: 'yellowRate', key: 'yellowRate', sorter: (a, b) => a.yellowRate - b.yellowRate, },
     { title: '经度', dataIndex: 'longitude', key: 'longitude' },
     { title: '纬度', dataIndex: 'latitude', key: 'latitude' },
     {
@@ -152,7 +159,6 @@ export default function index() {
     },
     // updateReason
     { title: '修改原因', dataIndex: 'updateReason', key: 'updateReason' },
-    { title: '填报时间', dataIndex: 'submitTime', key: 'submitTime' },
   ];
 
   columns.forEach((item) => (item.align = 'center'));
@@ -182,6 +188,9 @@ export default function index() {
       ...values,
       startTime: values.startTime ? values.startTime.format('YYYY-MM-DD') : null,
       endTime: values.endTime ? values.endTime.format('YYYY-MM-DD') : null,
+      startTimeStamp: values.startTimeStamp ? values.startTimeStamp.format('YYYY-MM-DD') : null,
+      endTimeStamp: values.endTimeStamp ? values.endTimeStamp.format('YYYY-MM-DD') : null,
+
       roomId: '',
     };
     queryObject = formattedValues;
@@ -197,7 +206,8 @@ export default function index() {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [farmerList, setFarmerList] = useState([]);
   const [collectorList, setCollectorList] = useState([]);
-
+  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [isOtherSelected, setIsOtherSelected] = useState(false);
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
   useEffect(() => {
@@ -256,8 +266,10 @@ export default function index() {
       originCollectorList = res.records || [];
     });
   };
-  const handleTableChange = (pagination: any) => {
-    getRoomData(queryObject, pagination.current, pagination.pageSize);
+  const handleTableChange = (paginations: any) => {
+    debugger
+    if (pagination.current == paginations.current && paginations.pageSize == pagination.pageSize) return
+    getRoomData(queryObject, paginations.current, paginations.pageSize);
   };
   const getCityList = () => {
     tobaccoService.getCountry().then((res) => {
@@ -327,69 +339,153 @@ export default function index() {
       editForm.setFieldValue('totalWeight', totalWeight);
       editForm.setFieldValue('yellowRate', yellowRate);
     }
+  }
+  const onSelectChange = (newSelectedRowKeys) => {
+    console.log(newSelectedRowKeys)
+    setSelectedRowKeys(newSelectedRowKeys);
+  };
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: onSelectChange,
+  };
+  const exportData = async () => {
+    // const token = JSON.parse(localStorage.getItem('token') || '{}').accessToken;
+
+    // const response = await fetch(window.config.baseUrl + 'api/excel/download', {
+    //   method: 'get',
+    //   headers: {
+    //     Token: token,
+    //     'Content-Type': 'application/json',
+    //   },
+    //   // body: JSON.stringify(obj),
+    // });
+    // const blob = await response.blob();
+    // const url = window.URL.createObjectURL(blob);
+    // const link = document.createElement('a');
+    // link.href = url;
+    // link.download = '烘烤数据.xls';
+    // document.body.appendChild(link);
+    // link.click();
+    // document.body.removeChild(link);
+
+    let headers = columns.map(x => x.title)
+    let data = tableData.filter(x => selectedRowKeys.includes(x.id))
+    const dataWithHeaders = [
+      headers,
+      // ...data.map(item => [item])
+      ...data.map(item => columns.map(col => {
+        if (item[col.key]) {
+
+          if (col.title == '烟农') {
+            return item[col.key].name
+          }
+          else if (col.title == '烟农手机号') return item[col.key].phoneNumber
+          else if (col.title == '烟农身份证号') return item[col.key].idNumber
+          else if (col.title == '采集人') return item[col.key].name
+          else if (col.title == '采集人手机号') return item[col.key].phoneNumber
+          else if (col.title == '采集人身份证号') return item[col.key].idNumber
+          else return item[col.key]
+        } else return ''
+      }))
+    ];
+    console.log(dataWithHeaders, 'dataWithHeaders')
+    // 将二维数组转换为工作表
+    const ws = XLSX.utils.aoa_to_sheet(dataWithHeaders);
+    // const ws = XLSX.utils.json_to_sheet(data, { header: headers });
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+    XLSX.writeFile(wb, '烘烤数据.xlsx');
+  }
+  const handleSelectChange = (value) => {
+    if (value === '其他') {
+      setIsOtherSelected(true);
+    } else {
+      setIsOtherSelected(false);
+    }
+  };
+  const handleInputBlur = (value) => {
+    if (editForm.getFieldValue('updateReason') === '') {
+      setIsOtherSelected(false);
+    }
   };
   return (
     <div>
       {contextHolder}
-      <Form
-        form={form}
-        name="dynamic_form"
-        onFinish={onFinish}
-        initialValues={queryObject}
-        layout="inline"
-      >
-        <Form.Item label="开始时间" name="startTime" style={{ marginTop: '5px' }}>
-          <DatePicker format="YYYY-MM-DD" />
-        </Form.Item>
-        <Form.Item label="结束时间" name="endTime" style={{ marginTop: '5px' }}>
-          <DatePicker format="YYYY-MM-DD" />
-        </Form.Item>
-        <Form.Item label="烤房编码" name="roomCode" style={{ marginTop: '5px' }}>
-          <Input allowClear={true} />
-        </Form.Item>
-        <Form.Item label="烟农" name="farmerName" style={{ marginTop: '5px' }}>
-          <Input allowClear={true} />
-        </Form.Item>
-        <Form.Item name="farmerPhone" label="烟农手机号" style={{ marginTop: '5px' }}>
-          <Input allowClear={true} />
-        </Form.Item>
-        <Form.Item name="farmerIDCard" label="烟农身份证号" style={{ marginTop: '5px' }}>
-          <Input allowClear={true} />
-        </Form.Item>
-        <Form.Item label="采集人" name="collectorName" style={{ marginTop: '5px' }}>
-          <Input allowClear={true} />
-        </Form.Item>
-        <Form.Item name="collectorPhone" label="采集人手机号" style={{ marginTop: '5px' }}>
-          <Input allowClear={true} />
-        </Form.Item>
-        <Form.Item name="collectorIDCard" label="采集人身份证号" style={{ marginTop: '5px' }}>
-          <Input allowClear={true} />
-        </Form.Item>
-        <Form.Item label="县公司" name="county" style={{ marginTop: '5px' }}>
-          <Select style={{ width: 200 }} onChange={changeCountry} allowClear>
-            {cityList.map((x) => (
-              <Option key={x} value={x}>
-                {x}
-              </Option>
-            ))}
-          </Select>
-        </Form.Item>
-        <Form.Item label="烟站名称" name="stationName" style={{ marginTop: '5px' }}>
-          {/* <Input allowClear={true} /> */}
-          <Select style={{ width: 200 }} allowClear>
-            {stationList.map((x) => (
-              <Option key={x} value={x}>
-                {x}
-              </Option>
-            ))}
-          </Select>
-        </Form.Item>
-        <Form.Item>
-          <Button type="primary" htmlType="submit" style={{ marginTop: '5px' }}>
-            查询
+
+      <div className="flex justify-between">
+        <Form
+          form={form}
+          name="dynamic_form"
+          onFinish={onFinish}
+          initialValues={queryObject}
+          layout="inline"
+        >
+          <Form.Item label="开始烘烤时间" name="startTime" style={{ marginTop: '5px' }}>
+            <DatePicker format="YYYY-MM-DD" />
+          </Form.Item>
+          <Form.Item label="结束烘烤时间" name="endTime" style={{ marginTop: '5px' }}>
+            <DatePicker format="YYYY-MM-DD" />
+          </Form.Item>
+          <Form.Item label="开始填报时间" name="startTimeStamp" style={{ marginTop: '5px' }}>
+            <DatePicker format="YYYY-MM-DD" />
+          </Form.Item>
+          <Form.Item label="结束填报时间" name="endTimeStamp" style={{ marginTop: '5px' }}>
+            <DatePicker format="YYYY-MM-DD" />
+          </Form.Item>
+          <Form.Item label="烟农" name="farmerName" style={{ marginTop: '5px' }}>
+            <Input allowClear={true} />
+          </Form.Item>
+          <Form.Item name="farmerPhone" label="烟农手机号" style={{ marginTop: '5px' }}>
+            <Input allowClear={true} />
+          </Form.Item>
+          <Form.Item name="farmerIDCard" label="烟农身份证号" style={{ marginTop: '5px' }}>
+            <Input allowClear={true} />
+          </Form.Item>
+          <Form.Item label="采集人" name="collectorName" style={{ marginTop: '5px' }}>
+            <Input allowClear={true} />
+          </Form.Item>
+          <Form.Item name="collectorPhone" label="采集人手机号" style={{ marginTop: '5px' }}>
+            <Input allowClear={true} />
+          </Form.Item>
+          <Form.Item name="collectorIDCard" label="采集人身份证号" style={{ marginTop: '5px' }}>
+            <Input allowClear={true} />
+          </Form.Item>
+          <Form.Item label="县公司" name="county" style={{ marginTop: '5px' }}>
+            <Select style={{ width: 200 }} onChange={changeCountry} allowClear>
+              {cityList.map((x) => (
+                <Option key={x} value={x}>
+                  {x}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item label="烟站名称" name="stationName" style={{ marginTop: '5px' }}>
+            {/* <Input allowClear={true} /> */}
+            <Select style={{ width: 200 }} allowClear>
+              {stationList.map((x) => (
+                <Option key={x} value={x}>
+                  {x}
+                </Option>
+              ))}
+            </Select>
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit" style={{ marginTop: '5px' }}>
+              查询
+            </Button>
+          </Form.Item>
+          <Form.Item style={{ marginTop: '5px' }}>
+            <span className="font-semibold text-red-600">总条数：{pagination.total}条</span>
+          </Form.Item>
+        </Form>
+        <div>
+          <Button type="primary" onClick={exportData} className="mx-5">
+            导出数据
           </Button>
-        </Form.Item>
-      </Form>
+        </div>
+      </div>
+
 
       <Table
         columns={columns}
@@ -400,6 +496,7 @@ export default function index() {
         scroll={{ x: true }}
         onChange={handleTableChange}
         pagination={pagination}
+        rowSelection={rowSelection} // 添加复选框
       />
       {/* 修改表单 */}
       <Modal
@@ -414,12 +511,12 @@ export default function index() {
         <Form initialValues={editingRecord || {}} onFinish={handleFinish} form={editForm}>
           <Row gutter={16}>
             <Col span={12}>
-              <Form.Item name="startTime" label="开始时间">
+              <Form.Item name="startTime" label="开始烘烤时间">
                 <DatePicker format={'YYYY-MM-DD'} onChange={changeDate} />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="endTime" label="结束时间">
+              <Form.Item name="endTime" label="结束烘烤时间">
                 <DatePicker format={'YYYY-MM-DD'} onChange={changeDate} />
               </Form.Item>
             </Col>
@@ -473,12 +570,12 @@ export default function index() {
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="totalWeight" label="黄烟重量(kg)">
+              <Form.Item name="totalWeight" label="黄烟总黄烟重量(kg)">
                 <Input disabled />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item name="sampleTotalWeight" label="抽样总重量(kg)">
+              <Form.Item name="sampleTotalWeight" label="抽样黄烟重量(kg)">
                 <Input disabled />
               </Form.Item>
             </Col>
@@ -488,8 +585,26 @@ export default function index() {
               </Form.Item>
             </Col>{' '}
             <Col span={12}>
-              <Form.Item name="updateReason" label="修改理由">
-                <Input />
+              <Form.Item name="updateReason" label="修改理由" rules={[{ required: true, message: '修改理由是必填项' }]}>
+
+                {/* <Select>
+                  <Option value='测产人员日期填报错误'>测产人员日期填报错误</Option>
+                  <Option value='测产人员重量填报错误'>测产人员重量填报错误</Option>
+                  <Option value='网络原因'>网络原因</Option>
+                  <Option value='其他'>其他</Option>
+                </Select> */}
+                {isOtherSelected ? (
+                  <Input
+                    onBlur={handleInputBlur}
+                  />
+                ) : (
+                  <Select onChange={handleSelectChange}>
+                    <Option value='测产人员日期填报错误'>测产人员日期填报错误</Option>
+                    <Option value='测产人员重量填报错误'>测产人员重量填报错误</Option>
+                    <Option value='网络原因'>网络原因</Option>
+                    <Option value='其他'>其他</Option>
+                  </Select>
+                )}
               </Form.Item>
             </Col>
             {/* <Col span={12}>
@@ -544,7 +659,7 @@ export default function index() {
                 <Input />
               </Form.Item>
             </Col> */}
-          </Row>
+          </Row >
 
           <Form.Item style={{ textAlign: 'right' }}>
             {/* <Button type="primary" htmlType="cancel" >
@@ -554,8 +669,8 @@ export default function index() {
               确定
             </Button>
           </Form.Item>
-        </Form>
-      </Modal>
-    </div>
+        </Form >
+      </Modal >
+    </div >
   );
 }

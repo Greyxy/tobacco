@@ -8,7 +8,7 @@ import { Result } from '#/api';
 // 创建 axios 实例
 const axiosInstance = axios.create({
   // baseURL: import.meta.env.VITE_APP_BASE_API,
-  baseURL: 'https://mgr.sctworks.com:65532/service/',
+  baseURL: window.config.baseUrl,
   timeout: 50000,
   headers: { 'Content-Type': 'application/json;charset=utf-8' },
 });
@@ -46,24 +46,24 @@ axiosInstance.interceptors.response.use(
       window.location.href = '/login';
       localStorage.clear();
       // router.replace('/login')
-      return;
+      return false;
     } else if (status == 40000) {
       // 服务器错误
-      message.error('error: 服务器错误');
+      message.error('error: 服务器错误'); return false;
     } else if (status == 30000) {
-      message.error('error: ' + msg || data);
+      message.error('error: ' + msg || data); return false;
     } else if (status == 403) {
-      message.error('没有权限！');
+      message.error('没有权限！'); return false;
     } else if (status == 500) {
-      message.error(msg);
+      message.error(msg); return false;
     } else {
       // 业务请求成功
       //  && status === ResultEnum.SUCCESS
       const hasSuccess = Reflect.has(res.data, 'status');
       if (hasSuccess) {
-        return data;
+        return data || 1;
       } else {
-        message.error(`Error: ${msg}`);
+        message.error(`Error: ${msg}`); return false;
       }
     }
 
