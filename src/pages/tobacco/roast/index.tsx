@@ -142,16 +142,12 @@ export default function index() {
       title: '烟农',
       // dataIndex: 'farmer.farmerName',
       key: 'farmer',
-      render: (record) => {
-        return <span>{record?.farmer?.name || ''}</span>;
-      },
+
     },
     {
       title: '采集人',
       key: 'collector',
-      render: (record) => {
-        return <span>{record?.collector?.name || ''}</span>;
-      },
+
     },
     {
       title: '开始烘烤时间', dataIndex: 'startTime', key: 'startTime',
@@ -190,37 +186,29 @@ export default function index() {
     {
       title: '烟农手机号',
       // dataIndex: 'farmer.farmerName',
-      key: 'farmer',
-      render: (record) => {
-        return <span>{record?.farmer?.phoneNumber || ''}</span>;
-      },
+      key: 'farmerPhoneNumber',
+
     },
     {
       title: '烟农身份证号',
       // dataIndex: 'farmer.farmerName',
-      key: 'farmer',
-      render: (record) => {
-        return <span>{record?.farmer?.idNumber || ''}</span>;
-      },
+      key: 'farmerIdNumber',
+
     },
 
     {
       title: '采集人手机号',
-      key: 'collector',
-      render: (record) => {
-        return <span>{record?.collector?.phoneNumber || ''}</span>;
-      },
+      key: 'collectorPhoneNumber',
+
     },
     {
       title: '采集人身份证号',
       // dataIndex: 'farmer.farmerName',
-      key: 'collector',
-      render: (record) => {
-        return <span>{record?.collector?.idNumber || ''}</span>;
-      },
+      key: 'collectorIdNumber',
+
     },
     { title: '县城', dataIndex: 'county', key: 'county' },
-    { title: '烟站名称', dataIndex: 'stationName', key: 'stationName' },
+    { title: '烟站名称', dataIndex: 'tobaccoStationName', key: 'tobaccoStationName' },
     { title: '夹烟工具', dataIndex: 'tool', key: 'tool' },
     { title: '总竿数', dataIndex: 'totalPoleAmount', key: 'totalPoleAmount' },
     {
