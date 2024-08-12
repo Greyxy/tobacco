@@ -17,6 +17,7 @@ import {
 import * as XLSX from 'xlsx';
 import dayjs from 'dayjs';
 import { useEffect, useState } from 'react';
+import './index.css'
 const { Option } = Select;
 
 function parseTime(data) {
@@ -33,15 +34,92 @@ function parseTime(data) {
 }
 var queryObject = {
   // roomId: "",
-  startTime: '',
-  endTime: '',
-  farmerName: '',
-  collectorName: '',
+  // startTime: '',
+  // endTime: '',
+  // farmerName: '',
+  // collectorName: '',
+
+  collectorName: "",
+  currentPage: 1,
+  endTime: null,
+  endTimeStamp: null,
+  farmerName: "",
+  pageSize: 10,
+  roomId: "",
+  startTime: null,
+  startTimeStamp: null,
+  "sortOrders": [
+    // {
+    //   "field": "start_time",
+    //   "order": 0
+    // },
+    // {
+    //   "field": "end_time",
+    //   "order": 0
+    // }, {
+    //   "field": "submit_time",
+    //   "order": 0
+    // }, {
+    //   "field": "sample_weight",
+    //   "order": 0
+    // }, {
+    //   "field": "green_weight",
+    //   "order": 0
+    // }, {
+    //   "field": "sample_total_weight",
+    //   "order": 0
+    // }, {
+    //   "field": "total_weight",
+    //   "order": 0
+    // }
+  ]
 };
 var originFarmerList = [];
 var originCollectorList = [];
 export default function index() {
   const { colorPrimary } = useThemeToken();
+  const [sortedStartTimeInfo, setSortedStartTimeInfo] = useState({
+    columnKey: '',
+    order: ''
+  });
+  const [sortedEndTimeInfo, setSortedEndTimeInfo] = useState({
+    columnKey: '',
+    order: ''
+  });
+  const [sortedSubmitTimeInfo, setSortedSubmitTimeInfo] = useState({
+    columnKey: '',
+    order: ''
+  });
+  // const [sortedDaysInfo, setSortedDaysInfo] = useState({
+  //   columnKey: '',
+  //   order: ''
+  // });
+  const [sortedTotalWeightInfo, setSortedTotalWeightInfo] = useState({
+    columnKey: '',
+    order: ''
+  });
+  const [sortedSamplePoleAmountInfo, setSortedSamplePoleAmountInfo] = useState({
+    columnKey: '',
+    order: ''
+  });
+  const [sortedSampleWeightInfo, setSortedSampleWeightInfo] = useState({
+    columnKey: '',
+    order: ''
+  });
+
+
+  const [sortedGreenWeightInfo, setSortedGreenWeightInfo] = useState({
+    columnKey: '',
+    order: ''
+  });
+  const [sortedsSampleTotalWeightInfo, setSortedSampleTotalWeightInfo] = useState({
+    columnKey: '',
+    order: ''
+  });
+  const [sortedYellowRateInfo, setSortedYellowRateInfo] = useState({
+    columnKey: '',
+    order: ''
+  });
   const columns = [
     {
       title: '操作',
@@ -58,8 +136,8 @@ export default function index() {
         </Space>
       ),
     },
-    { title: '烤房id', dataIndex: 'roomId', key: 'roomId' },
-    { title: '烤房编码', dataIndex: 'roomCode', key: 'roomCode' },
+    { title: '烤房id', dataIndex: 'roomId', key: 'roomId', },
+    { title: '烤房编码', dataIndex: 'roomCode', key: 'roomCode', },
     {
       title: '烟农',
       // dataIndex: 'farmer.farmerName',
@@ -75,13 +153,37 @@ export default function index() {
         return <span>{record?.collector?.name || ''}</span>;
       },
     },
-    { title: '开始烘烤时间', dataIndex: 'startTime', key: 'startTime', sorter: (a, b) => new Date(a.startTime) - new Date(b.startTime) },
-    { title: '结束烘烤时间', dataIndex: 'endTime', key: 'endTime', sorter: (a, b) => new Date(a.endTime) - new Date(b.endTime) },
+    {
+      title: '开始烘烤时间', dataIndex: 'startTime', key: 'startTime',
+      //  sorter: (a, b) => new Date(a.startTime) - new Date(b.startTime)
+      sorter: true,
+      sortOrder: sortedStartTimeInfo.columnKey === 'startTime' && sortedStartTimeInfo.order,
+
+    },
+    {
+      title: '结束烘烤时间', dataIndex: 'endTime', key: 'endTime',
+      // sorter: (a, b) => new Date(a.endTime) - new Date(b.endTime) 
+      sorter: true,
+      sortOrder: sortedEndTimeInfo.columnKey === 'endTime' && sortedEndTimeInfo.order,
+
+    },
     // { title: '开始填报时间', dataIndex: 'startTimeStamp', key: 'startTimeStamp', sorter: (a, b) => new Date(a.startTimeStamp) - new Date(b.startTimeStamp) },
     // { title: '结束填报时间', dataIndex: 'endTimeStamp', key: 'endTimeStamp', sorter: (a, b) => new Date(a.endTimeStamp) - new Date(b.endTimeStamp) },
-    { title: '填报时间', dataIndex: 'submitTime', key: 'submitTime', sorter: (a, b) => new Date(a.submitTime) - new Date(b.submitTime) },
+    {
+      title: '填报时间', dataIndex: 'submitTime', key: 'submitTime',
+      //  sorter: (a, b) => new Date(a.submitTime) - new Date(b.submitTime) 
+      sorter: true,
+      sortOrder: sortedSubmitTimeInfo.columnKey === 'submitTime' && sortedSubmitTimeInfo.order,
 
-    { title: '烘烤天数', dataIndex: 'days', key: 'days', sorter: (a, b) => a.days - b.days, },
+    },
+
+    {
+      title: '烘烤天数', dataIndex: 'days', key: 'days',
+      //  sorter: (a, b) => a.days - b.days, 
+      // sorter: true,
+      // sortOrder: sortedDaysInfo.columnKey === 'days' && sortedDaysInfo.order,
+
+    },
     { title: '炕次', dataIndex: 'sequence', key: 'sequence' },
     { title: '部位', dataIndex: 'part', key: 'part' },
 
@@ -121,12 +223,48 @@ export default function index() {
     { title: '烟站名称', dataIndex: 'stationName', key: 'stationName' },
     { title: '夹烟工具', dataIndex: 'tool', key: 'tool' },
     { title: '总竿数', dataIndex: 'totalPoleAmount', key: 'totalPoleAmount' },
-    { title: '总黄烟重量', dataIndex: 'totalWeight', key: 'totalWeight', sorter: (a, b) => a.totalWeight - b.totalWeight, },
-    { title: '抽样杆数', dataIndex: 'samplePoleAmount', key: 'samplePoleAmount', sorter: (a, b) => a.samplePoleAmount - b.samplePoleAmount, },
-    { title: '抽样黄烟重量', dataIndex: 'sampleWeight', key: 'sampleWeight', sorter: (a, b) => a.sampleWeight - b.sampleWeight, },
-    { title: '抽样青杂重量', dataIndex: 'greenWeight', key: 'greenWeight', sorter: (a, b) => a.greenWeight - b.greenWeight, },
-    { title: '抽样总黄烟重量', dataIndex: 'sampleTotalWeight', key: 'sampleTotalWeight', sorter: (a, b) => a.sampleTotalWeight - b.sampleTotalWeight, },
-    { title: '黄烟率', dataIndex: 'yellowRate', key: 'yellowRate', sorter: (a, b) => a.yellowRate - b.yellowRate, },
+    {
+      title: '总黄烟重量', dataIndex: 'totalWeight', key: 'totalWeight',
+      // sorter: (a, b) => a.totalWeight - b.totalWeight, 
+      sorter: true,
+      sortOrder: sortedTotalWeightInfo.columnKey === 'totalWeight' && sortedTotalWeightInfo.order,
+
+    },
+    {
+      title: '抽样杆数', dataIndex: 'samplePoleAmount', key: 'samplePoleAmount',
+      // sorter: (a, b) => a.samplePoleAmount - b.samplePoleAmount,
+      sorter: true,
+      sortOrder: sortedSamplePoleAmountInfo.columnKey === 'samplePoleAmount' && sortedSamplePoleAmountInfo.order,
+
+    },
+    {
+      title: '抽样黄烟重量', dataIndex: 'sampleWeight', key: 'sampleWeight',
+      //  sorter: (a, b) => a.sampleWeight - b.sampleWeight, 
+      sorter: true,
+      sortOrder: sortedSampleWeightInfo.columnKey === 'sampleWeight' && sortedSampleWeightInfo.order,
+
+    },
+    {
+      title: '抽样青杂重量', dataIndex: 'greenWeight', key: 'greenWeight',
+      //  sorter: (a, b) => a.greenWeight - b.greenWeight,
+      sorter: true,
+      sortOrder: sortedGreenWeightInfo.columnKey === 'greenWeight' && sortedGreenWeightInfo.order,
+
+    },
+    {
+      title: '抽样总黄烟重量', dataIndex: 'sampleTotalWeight', key: 'sampleTotalWeight',
+      // sorter: (a, b) => a.sampleTotalWeight - b.sampleTotalWeight, 
+      sorter: true,
+      sortOrder: sortedsSampleTotalWeightInfo.columnKey === 'sampleTotalWeight' && sortedsSampleTotalWeightInfo.order,
+
+    },
+    {
+      title: '黄烟率', dataIndex: 'yellowRate', key: 'yellowRate',
+      // sorter: (a, b) => a.yellowRate - b.yellowRate, 
+      sorter: true,
+      sortOrder: sortedYellowRateInfo.columnKey === 'yellowRate' && sortedYellowRateInfo.order,
+
+    },
     { title: '经度', dataIndex: 'longitude', key: 'longitude' },
     { title: '纬度', dataIndex: 'latitude', key: 'latitude' },
     {
@@ -208,6 +346,7 @@ export default function index() {
   const [collectorList, setCollectorList] = useState([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [isOtherSelected, setIsOtherSelected] = useState(false);
+
   const [messageApi, contextHolder] = message.useMessage();
   const [form] = Form.useForm();
   useEffect(() => {
@@ -224,6 +363,7 @@ export default function index() {
     }
   }, [editingRecord]);
   const getRoomData = (data: any, page: number, pageSize: number) => {
+    debugger
     tobaccoService.backingQuery({ ...data, currentPage: page, pageSize }).then((res) => {
       setPagination({ ...pagination, current: page, pageSize, total: res.total });
       res = res.records || [];
@@ -266,10 +406,79 @@ export default function index() {
       originCollectorList = res.records || [];
     });
   };
-  const handleTableChange = (paginations: any) => {
-    debugger
-    if (pagination.current == paginations.current && paginations.pageSize == pagination.pageSize) return
-    getRoomData(queryObject, paginations.current, paginations.pageSize);
+  const handleTableChange = (paginations: any, filters, sorter) => {
+    console.log(paginations, filters, sorter)
+    if (pagination.current !== paginations.current || paginations.pageSize !== pagination.pageSize)
+      getRoomData(queryObject, paginations.current, paginations.pageSize);
+
+    if (JSON.stringify(sorter) !== '{}') {
+      // setSortedInfo(sorter);
+      // 0 升序 1降序
+      let value = sorter.order == 'descend' ? 1 : sorter.order == 'ascend' ? 0 : 0
+      let key = '';
+
+      switch (sorter.columnKey) {
+        case 'startTime':
+          key = 'start_time';
+
+          setSortedStartTimeInfo(sorter); break;
+        case 'endTime':
+          key = 'end_time';
+
+          setSortedEndTimeInfo(sorter); break;
+        case 'submitTime':
+          key = 'submit_time';
+
+          setSortedSubmitTimeInfo(sorter); break;
+        case 'sampleWeight':
+          key = 'sample_weight';
+          setSortedSampleWeightInfo(sorter); break;
+        case 'greenWeight':
+          key = 'start_weight';
+          setSortedGreenWeightInfo(sorter); break;
+        case 'sampleTotalWeight':
+          key = 'sample_total_weight';
+          setSortedSampleTotalWeightInfo(sorter); break;
+        case 'totalWeight':
+          key = 'total_weight';
+          setSortedTotalWeightInfo(sorter); break;
+        // case 'days':
+        //   key = 'days';
+        //   setSortedDaysInfo(sorter); break;
+        case 'samplePoleAmount':
+          key = 'sample_pole_amount';
+          setSortedSamplePoleAmountInfo(sorter); break;
+        default:
+          key = '';
+      }
+      let index = queryObject.sortOrders.findIndex(item => {
+        // if (item.field == key) {
+        //   item.order = value
+        // } else {
+        //   item.order = 0
+        // }
+        return item.field == key
+      })
+      if (index != -1) {
+        queryObject.sortOrders[index].order = value
+      } else {
+        queryObject.sortOrders.push
+          ({
+            field: key,
+            order: value
+          })
+
+      }
+      // queryObject.sortOrders = [
+      //   {
+      //     field: key,
+      //     order: value
+      //   }
+      // ]
+      getRoomData(queryObject, pagination.current, pagination.pageSize);
+      return
+    }
+
   };
   const getCityList = () => {
     tobaccoService.getCountry().then((res) => {
@@ -350,52 +559,52 @@ export default function index() {
     onChange: onSelectChange,
   };
   const exportData = async () => {
-    // const token = JSON.parse(localStorage.getItem('token') || '{}').accessToken;
+    const token = JSON.parse(localStorage.getItem('token') || '{}').accessToken;
 
-    // const response = await fetch(window.config.baseUrl + 'api/excel/download', {
-    //   method: 'get',
-    //   headers: {
-    //     Token: token,
-    //     'Content-Type': 'application/json',
-    //   },
-    //   // body: JSON.stringify(obj),
-    // });
-    // const blob = await response.blob();
-    // const url = window.URL.createObjectURL(blob);
-    // const link = document.createElement('a');
-    // link.href = url;
-    // link.download = '烘烤数据.xls';
-    // document.body.appendChild(link);
-    // link.click();
-    // document.body.removeChild(link);
+    const response = await fetch(window.config.baseUrl + 'api/excel/download', {
+      method: 'post',
+      headers: {
+        Token: token,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(queryObject),
+    });
+    const blob = await response.blob();
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = '烘烤数据.xls';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
 
-    let headers = columns.map(x => x.title)
-    let data = tableData.filter(x => selectedRowKeys.includes(x.id))
-    const dataWithHeaders = [
-      headers,
-      // ...data.map(item => [item])
-      ...data.map(item => columns.map(col => {
-        if (item[col.key]) {
+    // let headers = columns.map(x => x.title)
+    // let data = tableData.filter(x => selectedRowKeys.includes(x.id))
+    // const dataWithHeaders = [
+    //   headers,
+    //   // ...data.map(item => [item])
+    //   ...data.map(item => columns.map(col => {
+    //     if (item[col.key]) {
 
-          if (col.title == '烟农') {
-            return item[col.key].name
-          }
-          else if (col.title == '烟农手机号') return item[col.key].phoneNumber
-          else if (col.title == '烟农身份证号') return item[col.key].idNumber
-          else if (col.title == '采集人') return item[col.key].name
-          else if (col.title == '采集人手机号') return item[col.key].phoneNumber
-          else if (col.title == '采集人身份证号') return item[col.key].idNumber
-          else return item[col.key]
-        } else return ''
-      }))
-    ];
-    console.log(dataWithHeaders, 'dataWithHeaders')
-    // 将二维数组转换为工作表
-    const ws = XLSX.utils.aoa_to_sheet(dataWithHeaders);
-    // const ws = XLSX.utils.json_to_sheet(data, { header: headers });
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
-    XLSX.writeFile(wb, '烘烤数据.xlsx');
+    //       if (col.title == '烟农') {
+    //         return item[col.key].name
+    //       }
+    //       else if (col.title == '烟农手机号') return item[col.key].phoneNumber
+    //       else if (col.title == '烟农身份证号') return item[col.key].idNumber
+    //       else if (col.title == '采集人') return item[col.key].name
+    //       else if (col.title == '采集人手机号') return item[col.key].phoneNumber
+    //       else if (col.title == '采集人身份证号') return item[col.key].idNumber
+    //       else return item[col.key]
+    //     } else return ''
+    //   }))
+    // ];
+    // console.log(dataWithHeaders, 'dataWithHeaders')
+    // // 将二维数组转换为工作表
+    // const ws = XLSX.utils.aoa_to_sheet(dataWithHeaders);
+    // // const ws = XLSX.utils.json_to_sheet(data, { header: headers });
+    // const wb = XLSX.utils.book_new();
+    // XLSX.utils.book_append_sheet(wb, ws, 'Sheet1');
+    // XLSX.writeFile(wb, '烘烤数据.xlsx');
   }
   const handleSelectChange = (value) => {
     if (value === '其他') {
@@ -485,21 +694,20 @@ export default function index() {
           </Button>
         </div>
       </div>
-
-
       <Table
         columns={columns}
         dataSource={tableData}
         rowKey="id"
         key={key}
-        className="mt-6 whitespace-nowrap"
+        className="mt-6 whitespace-nowrap custom-row"
         scroll={{ x: true }}
         onChange={handleTableChange}
         pagination={pagination}
         rowSelection={rowSelection} // 添加复选框
+        rowClassName={() => 'custom-row'}
       />
       {/* 修改表单 */}
-      <Modal
+      < Modal
         title="修改数据"
         open={isModalVisible}
         onOk={handleOk}

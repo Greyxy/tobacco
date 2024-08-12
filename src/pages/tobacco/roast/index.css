@@ -1,0 +1,8 @@
+.custom-row {
+  padding: 5px 10px ;
+  /* 根据需要调整内边距 */
+}
+
+.ant-table-cell {
+  padding: 5px 10px ;
+}

@@ -12,7 +12,7 @@ const { Option } = Select;
 export default function RolePage() {
   const [form] = Form.useForm();
   const { colorTextSecondary } = useThemeToken();
-
+  const [pagination, setPagination] = useState({ current: 1, pageSize: 10, total: 0 })
   const [messageApi, contextHolder] = message.useMessage();
   const [tableData, setTableData] = useState([]);
   const [roleList, setRoleList] = useState([]);
@@ -32,7 +32,7 @@ export default function RolePage() {
   });
 
   useEffect(() => {
-    getUserList();
+    getUserList(pagination);
     getRoleList();
     getCityList();
   }, []);
@@ -41,9 +41,13 @@ export default function RolePage() {
       form.setFieldsValue(userForm);
     }
   }, [userForm, isModalVisible]);
-  const getUserList = () => {
-    tobaccoService.getAllUser().then((res) => {
+  // useEffect(() => {
+  //   getUserList(pagination)
+  // }, [pagination])
+  const getUserList = (pagination) => {
+    tobaccoService.getAllUser({ currentPage: pagination.current, pageSize: pagination.pageSize }).then((res) => {
       let records = res.records || [];
+      setPagination({ current: pagination.current, pageSize: pagination.pageSize, total: res.total })
       setTableData(records);
     });
   };
@@ -79,7 +83,7 @@ export default function RolePage() {
         type: 'success',
         content: '删除用户成功',
       });
-      getUserList();
+      getUserList(pagination);
     });
   };
 
@@ -192,7 +196,7 @@ export default function RolePage() {
           type: 'success',
           content: '添加用户成功',
         });
-        getUserList();
+        getUserList(pagination);
         setIsModalVisible(false);
         form.resetFields();
       });
@@ -203,7 +207,7 @@ export default function RolePage() {
           type: 'success',
           content: '修改用户成功',
         });
-        getUserList();
+        getUserList(pagination);
         setIsModalVisible(false);
         form.resetFields();
       });
@@ -215,12 +219,22 @@ export default function RolePage() {
         setTableData(res);
       });
     } else {
-      getUserList();
+      getUserList(pagination);
     }
   };
   const handleCancel = () => {
     form.resetFields();
     setIsModalVisible(false);
+  };
+  const handleTableChange = (paginations: any, filters, sorter) => {
+    console.log(paginations, filters, sorter)
+    if (pagination.current !== paginations.current || paginations.pageSize !== pagination.pageSize)
+      getUserList(paginations);
+    // setPagination(...pagination, ...paginations)
+
+
+
+
   };
   return (
     <>
@@ -248,10 +262,11 @@ export default function RolePage() {
         <Table
           rowKey="id"
           size="small"
-          scroll={{ x: 'max-content', y: 600 }}
-          pagination={false}
+          scroll={{ x: 'max-content' }}
           columns={columns}
           dataSource={tableData}
+          pagination={pagination}
+          onChange={handleTableChange}
         />
       </Card>
       <Modal
