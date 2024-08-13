@@ -77,17 +77,27 @@ var originFarmerList = [];
 var originCollectorList = [];
 export default function index() {
   const { colorPrimary } = useThemeToken();
+  const [sortedInfo, setSortedInfo] = useState({
+    columnKey: '',
+    order: '',
+  });
   const [sortedStartTimeInfo, setSortedStartTimeInfo] = useState({
     columnKey: '',
     order: '',
+    multiple: 10,
+    compare: (a, b) => new Date(a.startTime) - new Date(b.startTime),
   });
   const [sortedEndTimeInfo, setSortedEndTimeInfo] = useState({
     columnKey: '',
     order: '',
+    multiple: 9,
+    compare: (a, b) => new Date(a.endTime) - new Date(b.endTime),
   });
   const [sortedSubmitTimeInfo, setSortedSubmitTimeInfo] = useState({
     columnKey: '',
     order: '',
+    multiple: 8,
+    compare: (a, b) => new Date(a.submitTime) - new Date(b.submitTime),
   });
   // const [sortedDaysInfo, setSortedDaysInfo] = useState({
   //   columnKey: '',
@@ -96,27 +106,39 @@ export default function index() {
   const [sortedTotalWeightInfo, setSortedTotalWeightInfo] = useState({
     columnKey: '',
     order: '',
+    multiple: 7,
+    compare: (a, b) => a.totalWeight - b.totalWeight,
   });
   const [sortedSamplePoleAmountInfo, setSortedSamplePoleAmountInfo] = useState({
     columnKey: '',
     order: '',
+    multiple: 6,
+    compare: (a, b) => a.samplePoleAmount - b.samplePoleAmount,
   });
   const [sortedSampleWeightInfo, setSortedSampleWeightInfo] = useState({
     columnKey: '',
     order: '',
+    multiple: 5,
+    compare: (a, b) => a.sampleWeight - b.sampleWeight,
   });
 
   const [sortedGreenWeightInfo, setSortedGreenWeightInfo] = useState({
     columnKey: '',
     order: '',
+    multiple: 4,
+    compare: (a, b) => a.greenWeight - b.greenWeight,
   });
   const [sortedSampleTotalWeightInfo, setSortedSampleTotalWeightInfo] = useState({
     columnKey: '',
     order: '',
+    multiple: 3,
+    compare: (a, b) => a.sampleTotalWeight - b.sampleTotalWeight,
   });
   const [sortedYellowRateInfo, setSortedYellowRateInfo] = useState({
     columnKey: '',
     order: '',
+    multiple: 2,
+    compare: (a, b) => a.yellowRate - b.yellowRate,
   });
   const columns = [
     {
@@ -151,16 +173,22 @@ export default function index() {
       dataIndex: 'startTime',
       key: 'startTime',
       //  sorter: (a, b) => new Date(a.startTime) - new Date(b.startTime)
+      // sorter: sortedStartTimeInfo,
+      // sortOrder: sortedStartTimeInfo.order,
       sorter: true,
-      sortOrder: sortedStartTimeInfo.columnKey === 'startTime' && sortedStartTimeInfo.order,
+      sortOrder: sortedInfo.columnKey === 'startTime' && sortedInfo.order,
     },
     {
       title: '结束烘烤时间',
       dataIndex: 'endTime',
       key: 'endTime',
-      // sorter: (a, b) => new Date(a.endTime) - new Date(b.endTime)
       sorter: true,
-      sortOrder: sortedEndTimeInfo.columnKey === 'endTime' && sortedEndTimeInfo.order,
+      sortOrder: sortedInfo.columnKey === 'endTime' && sortedInfo.order,
+
+      // sorter: sortedEndTimeInfo,
+      // sorter: (a, b) => new Date(a.endTime) - new Date(b.endTime)
+      // sorter: true,
+      // sortOrder: sortedEndTimeInfo.order,
     },
     // { title: '开始填报时间', dataIndex: 'startTimeStamp', key: 'startTimeStamp', sorter: (a, b) => new Date(a.startTimeStamp) - new Date(b.startTimeStamp) },
     // { title: '结束填报时间', dataIndex: 'endTimeStamp', key: 'endTimeStamp', sorter: (a, b) => new Date(a.endTimeStamp) - new Date(b.endTimeStamp) },
@@ -168,9 +196,12 @@ export default function index() {
       title: '填报时间',
       dataIndex: 'submitTime',
       key: 'submitTime',
-      //  sorter: (a, b) => new Date(a.submitTime) - new Date(b.submitTime)
       sorter: true,
-      sortOrder: sortedSubmitTimeInfo.columnKey === 'submitTime' && sortedSubmitTimeInfo.order,
+      sortOrder: sortedInfo.columnKey === 'submitTime' && sortedInfo.order,
+
+      //  sorter: (a, b) => new Date(a.submitTime) - new Date(b.submitTime)
+      // sorter: true,
+      // sortOrder: sortedSubmitTimeInfo.order,
     },
 
     {
@@ -215,54 +246,67 @@ export default function index() {
       title: '总黄烟重量',
       dataIndex: 'totalWeight',
       key: 'totalWeight',
-      // sorter: (a, b) => a.totalWeight - b.totalWeight,
       sorter: true,
-      sortOrder: sortedTotalWeightInfo.columnKey === 'totalWeight' && sortedTotalWeightInfo.order,
+      sortOrder: sortedInfo.columnKey === 'totalWeight' && sortedInfo.order,
+
+      // sorter: (a, b) => a.totalWeight - b.totalWeight,
+      // sorter: true,
+      // sortOrder: sortedTotalWeightInfo.order,
     },
     {
       title: '抽样杆数',
       dataIndex: 'samplePoleAmount',
       key: 'samplePoleAmount',
-      // sorter: (a, b) => a.samplePoleAmount - b.samplePoleAmount,
       sorter: true,
-      sortOrder:
-        sortedSamplePoleAmountInfo.columnKey === 'samplePoleAmount' &&
-        sortedSamplePoleAmountInfo.order,
+      sortOrder: sortedInfo.columnKey === 'samplePoleAmount' && sortedInfo.order,
+
+      // sorter: (a, b) => a.samplePoleAmount - b.samplePoleAmount,
+      // sorter: true,
+      // sortOrder: sortedSamplePoleAmountInfo.order,
     },
     {
       title: '抽样黄烟重量',
       dataIndex: 'sampleWeight',
       key: 'sampleWeight',
-      //  sorter: (a, b) => a.sampleWeight - b.sampleWeight,
       sorter: true,
-      sortOrder:
-        sortedSampleWeightInfo.columnKey === 'sampleWeight' && sortedSampleWeightInfo.order,
+      sortOrder: sortedInfo.columnKey === 'sampleWeight' && sortedInfo.order,
+
+      //  sorter: (a, b) => a.sampleWeight - b.sampleWeight,
+      // sorter: true,
+      // sortOrder: sortedSampleWeightInfo.order,
     },
     {
       title: '抽样青杂重量',
       dataIndex: 'greenWeight',
       key: 'greenWeight',
-      //  sorter: (a, b) => a.greenWeight - b.greenWeight,
       sorter: true,
-      sortOrder: sortedGreenWeightInfo.columnKey === 'greenWeight' && sortedGreenWeightInfo.order,
+      sortOrder: sortedInfo.columnKey === 'greenWeight' && sortedInfo.order,
+
+      //  sorter: (a, b) => a.greenWeight - b.greenWeight,
+      // sorter: true,
+      // sortOrder: sortedGreenWeightInfo.order,
     },
     {
       title: '抽样总黄烟重量',
       dataIndex: 'sampleTotalWeight',
       key: 'sampleTotalWeight',
-      // sorter: (a, b) => a.sampleTotalWeight - b.sampleTotalWeight,
       sorter: true,
-      sortOrder:
-        sortedSampleTotalWeightInfo.columnKey === 'sampleTotalWeight' &&
-        sortedSampleTotalWeightInfo.order,
+      sortOrder: sortedInfo.columnKey === 'sampleTotalWeight' && sortedInfo.order,
+
+      // sorter: (a, b) => a.sampleTotalWeight - b.sampleTotalWeight,
+      // sorter: true,
+      // sortOrder: sortedSampleTotalWeightInfo.order,
     },
     {
       title: '黄烟率',
       dataIndex: 'yellowRate',
       key: 'yellowRate',
-      // sorter: (a, b) => a.yellowRate - b.yellowRate,
       sorter: true,
-      sortOrder: sortedYellowRateInfo.columnKey === 'yellowRate' && sortedYellowRateInfo.order,
+      sortOrder: sortedInfo.columnKey === 'yellowRate' && sortedInfo.order,
+
+      // sorter: (a, b) => a.yellowRate - b.yellowRate,
+      // sorter: true,
+      // sortOrder: sortedYellowRateInfo.order,
     },
     { title: '经度', dataIndex: 'longitude', key: 'longitude' },
     { title: '纬度', dataIndex: 'latitude', key: 'latitude' },
@@ -408,73 +452,275 @@ export default function index() {
   };
   const handleTableChange = (paginations: any, filters, sorter) => {
     console.log(paginations, filters, sorter);
-    if (pagination.current !== paginations.current || paginations.pageSize !== pagination.pageSize)
+    if (
+      pagination.current !== paginations.current ||
+      paginations.pageSize !== pagination.pageSize
+    ) {
       getRoomData(queryObject, paginations.current, paginations.pageSize);
+      return;
+    }
+    // if (Array.isArray(sorter)) {
+    //   queryObject.sortOrders = [];
+    //   sorter.forEach((item) => {
+    //     let value = item.order == 'descend' ? 1 : item.order == 'ascend' ? 0 : -1;
+    //     let key = '';
+    //     switch (item.columnKey) {
+    //       case 'startTime':
+    //         key = 'start_time';
+    //         sorter.multiple = 10;
+    //         if (value == 1) {
+    //           sorter.compare = (a, b) => new Date(b.startTime) - new Date(a.startTime);
+    //         } else {
+    //           sorter.compare = (a, b) => new Date(a.startTime) - new Date(b.startTime);
+    //         }
+    //         setSortedStartTimeInfo(sorter);
+    //         break;
+    //       case 'endTime':
+    //         key = 'end_time';
+    //         sorter.multiple = 9;
+    //         if (value == 1) {
+    //           sorter.compare = (a, b) => new Date(b.endTime) - new Date(a.endTime);
+    //         } else {
+    //           sorter.compare = (a, b) => new Date(a.endTime) - new Date(b.endTime);
+    //         }
+    //         setSortedEndTimeInfo(sorter);
+    //         break;
+    //       case 'submitTime':
+    //         key = 'submit_time';
+    //         sorter.multiple = 8;
+    //         setSortedSubmitTimeInfo(sorter);
+    //         break;
+    //       case 'sampleWeight':
+    //         key = 'sample_weight';
+    //         sorter.multiple = 7;
+    //         setSortedSampleWeightInfo(sorter);
+    //         break;
+    //       case 'greenWeight':
+    //         key = 'start_weight';
+    //         sorter.multiple = 6;
+    //         setSortedGreenWeightInfo(sorter);
+    //         break;
+    //       case 'sampleTotalWeight':
+    //         key = 'sample_total_weight';
+    //         sorter.multiple = 5;
+    //         setSortedSampleTotalWeightInfo(sorter);
+    //         break;
+    //       case 'totalWeight':
+    //         key = 'total_weight';
+    //         sorter.multiple = 4;
+    //         setSortedTotalWeightInfo(sorter);
+    //         break;
+    //       // case 'days':
+    //       //   key = 'days';
+    //       //   setSortedDaysInfo(sorter); break;
+    //       case 'samplePoleAmount':
+    //         key = 'sample_pole_amount';
+    //         sorter.multiple = 2;
+    //         setSortedSamplePoleAmountInfo(sorter);
+    //         break;
+    //       default:
+    //         key = '';
+    //     }
+    //     queryObject.sortOrders.push({ field: key, order: value });
+    //   });
+    // } else if (JSON.stringify(sorter) !== '{}') {
+    //   // setSortedInfo(sorter);
+    //   //   // 0 升序 1降序
+    //   let value = sorter.order == 'descend' ? 1 : sorter.order == 'ascend' ? 0 : -1;
+    //   let key = '';
+
+    //   switch (sorter.columnKey) {
+    //     case 'startTime':
+    //       key = 'start_time';
+    //       sorter.multiple = 10;
+    //       if (value == 1) {
+    //         sorter.compare = (a, b) => new Date(b.startTime) - new Date(a.startTime);
+    //       } else {
+    //         sorter.compare = (a, b) => new Date(a.startTime) - new Date(b.startTime);
+    //       }
+    //       setSortedStartTimeInfo(sorter);
+    //       break;
+    //     case 'endTime':
+    //       key = 'end_time';
+    //       sorter.multiple = 9;
+    //       if (value == 1) {
+    //         sorter.compare = (a, b) => new Date(b.endTime) - new Date(a.endTime);
+    //       } else {
+    //         sorter.compare = (a, b) => new Date(a.endTime) - new Date(b.endTime);
+    //       }
+    //       setSortedEndTimeInfo(sorter);
+    //       break;
+    //     case 'submitTime':
+    //       key = 'submit_time';
+    //       sorter.multiple = 8;
+    //       setSortedSubmitTimeInfo(sorter);
+    //       break;
+    //     case 'sampleWeight':
+    //       key = 'sample_weight';
+    //       sorter.multiple = 7;
+    //       setSortedSampleWeightInfo(sorter);
+    //       break;
+    //     case 'greenWeight':
+    //       key = 'start_weight';
+    //       sorter.multiple = 6;
+    //       setSortedGreenWeightInfo(sorter);
+    //       break;
+    //     case 'sampleTotalWeight':
+    //       key = 'sample_total_weight';
+    //       sorter.multiple = 5;
+    //       setSortedSampleTotalWeightInfo(sorter);
+    //       break;
+    //     case 'totalWeight':
+    //       key = 'total_weight';
+    //       sorter.multiple = 4;
+    //       setSortedTotalWeightInfo(sorter);
+    //       break;
+    //     // case 'days':
+    //     //   key = 'days';
+    //     //   setSortedDaysInfo(sorter); break;
+    //     case 'samplePoleAmount':
+    //       key = 'sample_pole_amount';
+    //       sorter.multiple = 2;
+    //       setSortedSamplePoleAmountInfo(sorter);
+    //       break;
+    //     default:
+    //       key = '';
+    //   }
+    //   let findIndex = queryObject.sortOrders.findIndex((item) => {
+    //     // if (item.field == key) {
+    //     //   item.order = value
+    //     // } else {
+    //     //   item.order = 0
+    //     // }
+    //     return item.field == key;
+    //   });
+    //   console.log(findIndex, 'index=========');
+    //   if (findIndex != -1) {
+    //     if (value == -1) {
+    //       queryObject.sortOrders.splice(findIndex, 1);
+    //     } else {
+    //       queryObject.sortOrders[findIndex].order = value;
+    //     }
+    //   } else {
+    //     if (value == -1) {
+    //     } else {
+    //       queryObject.sortOrders.push({
+    //         field: key,
+    //         order: value,
+    //       });
+    //     }
+    //   }
+    //   // queryObject.sortOrders = [
+    //   //   {
+    //   //     field: key,
+    //   //     order: value
+    //   //   }
+    //   // ]
+    // }
+    // getRoomData(queryObject, pagination.current, pagination.pageSize);
 
     if (JSON.stringify(sorter) !== '{}') {
-      // setSortedInfo(sorter);
+      setSortedInfo(sorter);
       // 0 升序 1降序
-      let value = sorter.order == 'descend' ? 1 : sorter.order == 'ascend' ? 0 : 0;
+      let value = sorter.order == 'descend' ? 1 : sorter.order == 'ascend' ? 0 : -1;
       let key = '';
 
       switch (sorter.columnKey) {
         case 'startTime':
           key = 'start_time';
-
-          setSortedStartTimeInfo(sorter);
+          // sorter.multiple = 10;
+          // if (value == 1) {
+          //   sorter.compare = (a, b) => new Date(b.startTime) - new Date(a.startTime);
+          // } else {
+          //   sorter.compare = (a, b) => new Date(a.startTime) - new Date(b.startTime);
+          // }
+          // setSortedStartTimeInfo(sorter);
           break;
         case 'endTime':
           key = 'end_time';
-
-          setSortedEndTimeInfo(sorter);
+          // sorter.multiple = 9;
+          // if (value == 1) {
+          //   sorter.compare = (a, b) => new Date(b.endTime) - new Date(a.endTime);
+          // } else {
+          //   sorter.compare = (a, b) => new Date(a.endTime) - new Date(b.endTime);
+          // }
+          // setSortedEndTimeInfo(sorter);
           break;
         case 'submitTime':
           key = 'submit_time';
-
-          setSortedSubmitTimeInfo(sorter);
+          // sorter.multiple = 8;
+          // setSortedSubmitTimeInfo(sorter);
           break;
         case 'sampleWeight':
           key = 'sample_weight';
-          setSortedSampleWeightInfo(sorter);
+          // sorter.multiple = 7;
+          // setSortedSampleWeightInfo(sorter);
           break;
         case 'greenWeight':
-          key = 'start_weight';
-          setSortedGreenWeightInfo(sorter);
+          key = 'green_weight';
+          // sorter.multiple = 6;
+          // setSortedGreenWeightInfo(sorter);
           break;
         case 'sampleTotalWeight':
           key = 'sample_total_weight';
-          setSortedSampleTotalWeightInfo(sorter);
+          // sorter.multiple = 5;
+          // setSortedSampleTotalWeightInfo(sorter);
           break;
         case 'totalWeight':
           key = 'total_weight';
-          setSortedTotalWeightInfo(sorter);
+          // sorter.multiple = 4;
+          // setSortedTotalWeightInfo(sorter);
           break;
         // case 'days':
         //   key = 'days';
         //   setSortedDaysInfo(sorter); break;
         case 'samplePoleAmount':
           key = 'sample_pole_amount';
-          setSortedSamplePoleAmountInfo(sorter);
+          // sorter.multiple = 2;
+          // setSortedSamplePoleAmountInfo(sorter);
+          break;
+        case 'yellowRate':
+          key = 'yellow_rate';
+          // sorter.multiple = 2;
+          // setSortedSamplePoleAmountInfo(sorter);
           break;
         default:
           key = '';
       }
-      let index = queryObject.sortOrders.findIndex((item) => {
-        // if (item.field == key) {
-        //   item.order = value
-        // } else {
-        //   item.order = 0
-        // }
-        return item.field == key;
-      });
-      if (index != -1) {
-        queryObject.sortOrders[index].order = value;
+      if (value == -1) {
+        queryObject.sortOrders = [];
       } else {
-        queryObject.sortOrders.push({
-          field: key,
-          order: value,
-        });
+        queryObject.sortOrders = [
+          {
+            field: key,
+            order: value,
+          },
+        ];
       }
+      // let findIndex = queryObject.sortOrders.findIndex((item) => {
+      //   // if (item.field == key) {
+      //   //   item.order = value
+      //   // } else {
+      //   //   item.order = 0
+      //   // }
+      //   return item.field == key;
+      // });
+      // // console.log(findIndex, 'index=========');
+      // if (findIndex != -1) {
+      //   if (value == -1) {
+      //     queryObject.sortOrders.splice(findIndex, 1);
+      //   } else {
+      //     queryObject.sortOrders[findIndex].order = value;
+      //   }
+      // } else {
+      //   if (value == -1) {
+      //   } else {
+      //     queryObject.sortOrders.push({
+      //       field: key,
+      //       order: value,
+      //     });
+      //   }
+      // }
       // queryObject.sortOrders = [
       //   {
       //     field: key,
@@ -482,7 +728,6 @@ export default function index() {
       //   }
       // ]
       getRoomData(queryObject, pagination.current, pagination.pageSize);
-      return;
     }
   };
   const getCityList = () => {
@@ -564,6 +809,7 @@ export default function index() {
     onChange: onSelectChange,
   };
   const exportData = async () => {
+    // console.log();
     const token = JSON.parse(localStorage.getItem('token') || '{}').accessToken;
     let obj = JSON.parse(JSON.stringify(queryObject));
     obj.currentPage = null;
@@ -580,7 +826,7 @@ export default function index() {
     const url = window.URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = '烘烤数据.xls';
+    link.download = '烘烤数据' + dayjs().format('YYYY-MM-DD_hh-mm-ss') + '.xlsx';
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
