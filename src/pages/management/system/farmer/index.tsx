@@ -1,23 +1,18 @@
 import tobaccoService from '@/api/services/tobaccoService';
-import AsyncImage from '@/pages/components/asyncImage';
-import { useThemeToken } from '@/theme/hooks';
+import { IconButton, Iconify } from '@/components/icon';
 import {
   Button,
-  Col,
   Form,
   Input,
   message,
   Modal,
   Popconfirm,
-  Row,
   Select,
   Space,
-  Table,
+  Table
 } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useEffect, useState } from 'react';
-import { IconButton, Iconify } from '@/components/icon';
-import ProTag from '@/theme/antd/components/tag';
 const { Option } = Select;
 interface TableData {
   id: string;
@@ -157,14 +152,16 @@ export default function index() {
   }, [editingRecord]);
   const handleDelete = (record) => {
     tobaccoService.deleteFarmerById(record.id).then((res) => {
-      message.open({
-        type: 'success',
-        content: '删除成功',
-      });
-      if (queryObject.idNumber || queryObject.phoneNumber || queryObject.name) {
-        getFarmerByQuery(queryObject);
-      } else {
-        getFarmerList({ page: pagination.current, size: pagination.pageSize });
+      if (res) {
+        message.open({
+          type: 'success',
+          content: '删除成功',
+        });
+        if (queryObject.idNumber || queryObject.phoneNumber || queryObject.name) {
+          getFarmerByQuery(queryObject);
+        } else {
+          getFarmerList({ page: pagination.current, size: pagination.pageSize });
+        }
       }
     });
   };

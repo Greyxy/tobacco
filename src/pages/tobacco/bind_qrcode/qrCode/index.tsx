@@ -7,7 +7,6 @@ import {
   Input,
   message,
   Modal,
-  Popconfirm,
   QRCode,
   Radio,
   Row,
@@ -94,7 +93,7 @@ export default function QrCode() {
           <IconButton onClick={() => handleEdit(record)} title="修改">
             <Iconify icon="solar:pen-bold-duotone" size={18} />
           </IconButton>
-          <Popconfirm
+          {/* <Popconfirm
             title="删除二维码？"
             okText="Yes"
             cancelText="No"
@@ -104,7 +103,7 @@ export default function QrCode() {
             <IconButton>
               <Iconify icon="mingcute:delete-2-fill" size={18} className="text-error" />
             </IconButton>
-          </Popconfirm>
+          </Popconfirm> */}
           {/* <Button type="link" onClick={() => handleDelete(record)}>
             删除
           </Button> */}
@@ -260,33 +259,40 @@ export default function QrCode() {
   };
 
   const handleFinish = (values: any) => {
-    const { roomCode, remark } = values;
-    if (!roomCode || !remark) {
+    const { roomCode } = values;
+    if (!roomCode) {
       messageApi.open({
         type: 'error',
-        content: '请选择房间和二维码',
+        content: '请输入要绑定的烤房编码',
       });
       return;
     }
 
     const room = tableData.find((x) => x.code === roomCode);
-    const qrCode = qrCodeData.find((x) => x.remark === remark);
+    // const qrCode = qrCodeData.find((x) => x.remark === remark);
 
-    if (room && qrCode) {
+    if (room) {
       const obj = {
         roomCode: room.code,
-        roomId: room.id,
-        qrCodeId: qrCode.id,
+        // roomId: room.id,
+        qrCodeId: editingRecord.qrCodeId,
       };
-      tobaccoService.saveRoomCode(obj).then(() => {
-        messageApi.open({
-          type: 'success',
-          content: '绑定成功',
-        });
-        bindForm.resetFields();
-        getRoomData();
+      tobaccoService.saveRoomCode(obj).then((res) => {
+        if (res) {
+          messageApi.open({
+            type: 'success',
+            content: '绑定成功',
+          });
+          bindForm.resetFields();
+          getRoomData();
 
-        setIsModalVisible(false);
+          setIsModalVisible(false);
+        }
+      });
+    } else {
+      messageApi.open({
+        type: 'error',
+        content: '未找到绑定的烤房',
       });
     }
   };
@@ -308,12 +314,13 @@ export default function QrCode() {
     });
   };
   const handleBind = (record: any) => {
+    console.log(record);
     bindForm.resetFields();
 
     const obj = {
       roomCode: record.code,
       roomId: record.id || '',
-      qrCodeId: '',
+      qrCodeId: record.id,
       remark: record.remark || '',
     };
 
@@ -377,13 +384,14 @@ export default function QrCode() {
           initialValues={queryObject}
         >
           <Form.Item name="remark" label="备注">
-            <Select placeholder="" style={{ width: 200 }} allowClear showSearch>
+            {/* <Select placeholder="" style={{ width: 200 }} allowClear showSearch>
               {remarkList.map((x, index) => (
                 <Option key={index} value={x}>
                   {x}
                 </Option>
               ))}
-            </Select>
+            </Select> */}
+            <Input allowClear />
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit">
@@ -429,13 +437,14 @@ export default function QrCode() {
           <Row gutter={16}>
             <Col span={24}>
               <Form.Item name="roomCode" label="烤房编码">
-                <Select>
+                {/* <Select>
                   {roomCodeList.map((x, index) => (
                     <Option key={index} value={x}>
                       {x}
                     </Option>
                   ))}
-                </Select>
+                </Select> */}
+                <Input allowClear />
               </Form.Item>
             </Col>
             {/* <Col span={24}>
