@@ -23,6 +23,7 @@ export enum TobaccoApi {
   getQrCode = '/qrcode/get',
   deleteQrCodeById = '/qrcode/delete?id=',
   getQrCodeById = '/qrcode/getById?id=',
+  getQrCodeByRemark = '/qrcode/getByRemark?remark=',
   updateQrCode = '/qrcode/update',
   saveRoomCode = '/room/saveRoomCode',
   downloadImg = 'img/getCode',
@@ -82,7 +83,7 @@ const getRoomByArea = (data) => apiClient.post({ url: TobaccoApi.getRoomByArea, 
 const updatebacking = (data) => apiClient.post({ url: TobaccoApi.updatebacking, data });
 const reviewBacking = (params) => apiClient.post({ url: `${TobaccoApi.reviewBacking}`, params });
 const refuseBacking = (params) => apiClient.post({ url: `${TobaccoApi.refuseBacking}`, params });
-const batchReview = (data) => apiClient.post({ url: TobaccoApi.batchReview, data })
+const batchReview = (data) => apiClient.post({ url: TobaccoApi.batchReview, data });
 const backingQuery = (data: any) => {
   return apiClient.post({ url: TobaccoApi.backingQuery, data });
 };
@@ -94,6 +95,8 @@ const getQrCode = (params) => apiClient.get({ url: `${TobaccoApi.getQrCode}`, pa
 const deleteQrCodeById = (id: string) =>
   apiClient.post({ url: `${TobaccoApi.deleteQrCodeById}${id}` });
 const getQrCodeById = (id: string) => apiClient.get({ url: `${TobaccoApi.getQrCodeById}${id}` });
+const getQrCodeByRemark = (remark: string) =>
+  apiClient.get({ url: `${TobaccoApi.getQrCodeByRemark}${remark}` });
 const updateQrCode = (data) => apiClient.post({ url: `${TobaccoApi.updateQrCode}`, data });
 const saveRoomCode = (data) => apiClient.post({ url: `${TobaccoApi.saveRoomCode}`, data });
 const downloadImg = (data) => apiClient.post({ url: `${TobaccoApi.downloadImg}`, data });
@@ -154,6 +157,7 @@ export default {
   getQrCode,
   deleteQrCodeById,
   getQrCodeById,
+  getQrCodeByRemark,
   updateQrCode,
   saveRoomCode,
   downloadImg,

@@ -174,14 +174,18 @@ export default function QrCode() {
     getRoomData();
   }, []);
   const onQrcodeFinish = (values: any) => {
-    const qrCode = qrCodeData.find((x) => x.remark === values.remark);
-    if (qrCode) {
-      tobaccoService.getQrCodeById(qrCode.id).then((res) => {
-        setQrCodeData([res]);
+    // const qrCode = qrCodeData.find((x) => x.remark === values.remark);
+    if (values.remark) {
+      tobaccoService.getQrCodeByRemark(values.remark).then((res) => {
+        if (Array.isArray(res)) {
+          setQrCodeData(res);
+        } else {
+          setQrCodeData([res]);
+        }
       });
     } else {
       getQrCodeData(queryObject, 1, pagination.pageSize);
-      setPagination({ ...pagination, current: 1 })
+      setPagination({ ...pagination, current: 1 });
     }
   };
   const getQrCodeData = (data, page, pageSize) => {
@@ -501,7 +505,7 @@ export default function QrCode() {
           <Form.Item
             name="status"
             label="状态"
-          // rules={[{ required: true, message: 'Please select a status!' }]}
+            // rules={[{ required: true, message: 'Please select a status!' }]}
           >
             <Radio.Group>
               <Radio value={0}>停用</Radio>
